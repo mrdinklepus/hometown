@@ -1,0 +1,28 @@
+<div id="subnav">
+	<ul>
+		<li id="addPayee" onclick="showManagePayees();">Manage Payees</li>
+		<li id="schedulePayment" onclick="showSchedule();" style="background-color:#BED8F1">Schedule Payment</li>
+	</ul>
+</div>
+<div id="billpay">
+	<div class="title">Schedule Payment</div>
+	<div class="currentPayee">
+		Select Payee:
+		<select style="margin-left:29px;">
+			<option>Payee 1</option>
+			<option>Payee 2</option>
+			<option>Payee 3</option>
+		</select>
+	</div>
+	<div class="currentPayee">			
+		Payment Account:
+		<select>
+			<option>Payment Account 1</option>
+			<option>Payment Account 2</option>
+			<option>Payment Account 3</option>
+		</select>
+	</div>
+	<div class="currentPayee"> Amount:	<input type="text" style="margin-left:59px;"/> </div>
+	<div class="currentPayee"> Date to Transfer:<input type="text" style="margin-left:12px;"/> </div>
+	<input style="position:relative; left:190px; margin-top:20px;" type="button" value="schedule" />	
+</div>

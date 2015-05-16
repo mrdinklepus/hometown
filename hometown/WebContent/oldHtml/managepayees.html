@@ -1,0 +1,46 @@
+<div id="subnav">
+	<ul>
+		<li id="addPayee" onclick="showManagePayees();" style="background-color:#BED8F1">Manage Payees</li>
+		<li id="schedulePayment" onclick="showSchedule();">Schedule Payment</li>
+	</ul>
+</div>
+<div id="billpay">
+	<div class="current">
+		<div class="title">Current Payees</div>
+		<div id="payee1" class="currentPayee">
+			<div class="payeeName">Somebody with a long name</div>
+			<div class="buttons">
+				<span class="edit">edit</span>
+				<span class="remove">remove</span>
+			</div>
+		</div>	
+		<div id="payee2" class="currentPayee">
+			<div class="payeeName">Somebody else</div>
+			<div class="buttons">
+				<span class="edit">edit</span>
+				<span class="remove">remove</span>
+			</div>
+		</div>
+		<div id="payee3" class="currentPayee">
+			<div class="payeeName">Somebody else</div>
+			<div class="buttons">
+				<span class="edit">edit</span>
+				<span class="remove">remove</span>
+			</div>
+		</div>		
+	</div>
+	<div class="spacer"></div>
+	<div class="addnew">
+		<div class="title">New Payee Information</div>
+		<div class="payeeInfo">					
+				Company Name:&nbsp;&nbsp; <input type="text" neame="coname"/> <br />
+				Street Address: <input type="text" name="street"/> <br />
+				City: <input type="text" name="city"/> <br />
+				State: <input type="text" name="state" /> &nbsp;(ex. ID) <br />
+				Zip: <input type="text" name="zip" /> <br />
+				Phone: <input type="text" name="phone" /> &nbsp; (optional)<br />
+				Account Number:&nbsp; <input type="text" name="accnum"/> <br />		
+				<input style="position:relative; left:220px;" type="button" value="add" />		
+		</div>
+	</div>
+</div>	

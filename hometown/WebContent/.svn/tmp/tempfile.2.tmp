@@ -1,0 +1,211 @@
+/*
+ * Example: see below for usage. 
+ *  
+ * If the default behavior must be cancelled
+ * use the stopDefault function:
+ * Ex. 
+ * 	function x(event){ 
+ * 		//IE
+ * 		if (event == null){
+ *			event = window.event;
+ *		}
+ * 		//Firefox, Mozilla, etc...
+ *		stopDefault(event);
+ * 	}
+ */
+
+var isNavVisible = false;
+
+function setActive(id)
+{	
+	if (id == null){ return false; }
+	if (!document.getElementById(id)){ return false; }
+	
+	var items = (document.getElementById(id).parentNode).getElementsByTagName("li");
+	for(var i = 0; i < items.length; i++){
+		document.getElementById(items[i].id).style.background = "#84B5E4";	
+	}	
+	document.getElementById(id).style.background = "#BED8F1";
+}
+
+function show(id)
+{
+	document.getElementById(id).style.display = "block";	
+}
+
+function hide(id)
+{
+	document.getElementById(id).style.display = "none";
+}
+
+function init()
+{	
+	hide("logout");	
+
+	var nav = document.getElementById("navigation").getElementsByTagName("li");
+	
+	for(var i = 0; i < nav.length; i++){
+		Object.extend(nav[i],navExtend);
+	}
+}
+
+function showLogin()
+{
+	loadSubPageContent(new updateContent(), "login.html");
+}
+
+function showSignup()
+{
+	loadSubPageContent(new updateContent(),"signup.html");
+}
+
+function showViewAccounts()
+{
+	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=viewAccounts", "GET");
+	setActive("viewAccounts");
+}
+
+function showBillPay()
+{
+	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadBillPay", "GET");
+	setActive("billPay");
+
+}
+
+function showManagePayees()
+{
+	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadManagePayees", "GET");
+}
+
+function showSchedule(){
+	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadSchedulePayment", "GET");
+}
+
+function showTransfer()
+{
+	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadTransfer", "GET");
+	setActive("transfer");
+}
+
+function showOrderCheck()
+{
+	loadSubPageContent(new updateContent(),"ordercheck.html");
+	setActive("orderCheck");
+}
+
+function showViewStatement()
+{
+	loadSubPageContent(new updateContent(),"viewstatement.html");
+	setActive("viewStatement");
+}
+
+function showNav()
+{
+	//showViewAccounts();
+	show("navigation");
+	show("logout");	
+}
+
+function showAccountDetails(accountId)
+{
+	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=viewDetailedAccount&accountId=" + accountId );
+	setActive("viewAccounts");
+}
+
+function getFormElements(){
+	var params = new Array();	
+	
+	var formElements = document.getElementsByTagName("form")[0];
+	
+	for (var i = 0 ; i < formElements.length ; i++){
+		params.push(new Array(formElements[i].name, formElements[i].value));
+	}			
+	return params;
+}
+
+function postForm(control){	
+	var params = getFormElements();
+	var poststr;
+	
+	if (control == null) control = new updateContent();
+
+	for(var i = 0; i < params.length - 1; i++){		
+		if (i == 0){
+			poststr = params[i][0] + "=" + encodeURI(params[i][1]);
+		}else{		
+			poststr += "&" + params[i][0] + "=" + encodeURI(params[i][1]);
+		}
+	}
+	
+	//clearForm();
+	loadSubPageContent(control, "HomeTownServlet?", "POST", poststr);
+
+}
+
+function clearForm(){
+	var formElements = document.getElementsByTagName("form")[0];
+	
+	for (var i = 0 ; i < formElements.length - 2 ; i++){
+		formElements[i].value = "";
+	}
+	formElements[0].focus();
+}
+
+function payBills(){
+	var params = getFormElements();
+	var poststr = "cmd=payBill&bills=";
+	
+	for (var i = 0; i < params.length; i++){
+		if (i % 3 == 0 && i != 0){
+			poststr += ";";
+		}
+		poststr += params[i][1] + ":";
+	}
+	
+	alert(poststr);
+	
+	loadSubPageContent(new updateContent(), "HomeTownServlet?", "POST", poststr);	
+}
+
+function removePayee(payeeId)
+{
+	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=removePayee&payeeid=" + payeeId );
+}
+
+function removePayment(paymentId)
+{
+	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=removePayment&paymentid=" + paymentId );
+}
+
+function logout(){
+	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=logout");
+	hide("logout");
+}
+
+var navExtend = {
+	onmouseclick: function(e){ 
+		alert(e);
+	},
+	
+	onmouseover: function(e){		
+		document.getElementById(this.id).style.background = "#BED8F1";
+	},
+	
+	onmouseout: function(e){
+		document.getElementById(this.id).style.background = "#84B5E4";
+	}
+	
+};
+
+
+Object.extend = function(destination, source) {
+	if(destination == null)
+	    return null;
+	
+	if(source)
+	for (var property in source)
+	        destination[property] = source[property];
+	
+	return destination;
+}
+

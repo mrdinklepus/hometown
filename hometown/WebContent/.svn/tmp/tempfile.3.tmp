@@ -1,0 +1,360 @@
+@CHARSET "ISO-8859-1";
+
+input
+{
+	margin-bottom:5px;
+}
+
+.right
+{
+	position:relative;
+	margin-left:100px;
+}
+
+#wrapper
+{
+	
+	width:800px;
+	height:auto;	
+	border: solid 1px black;	
+}
+
+#title
+{
+	width:100%;
+	height:75px;
+	border-bottom:solid 1px black;
+	background: url(images/hometownlogo.gif) center no-repeat;
+}
+
+#navigation
+{
+	width:100%;
+	height:30px;
+	margin:auto auto;
+	padding-top:10px;
+	padding-left:2px;
+	background: #84B5E4;
+}
+
+#subnav
+{
+	position:relative;
+	margin:10px auto 10px auto;
+	width:90%;
+	height:20px;
+}
+
+#content
+{
+	width:100%;
+	height:auto;
+	min-height:410px;
+}
+
+#logout
+{
+	position:relative;
+	float:right;
+	width:75px;
+	background: #84B5E4;
+	text-align:center;	
+}
+
+#footer
+{
+	position:relative;
+	width:100%;
+	height:45px;
+	text-align:center;
+	background: #84B5E4;
+	font-size:8pt;
+	border-top:solid 1px black;
+}
+
+#loginbar
+{	
+	position:relative;
+	float:left;
+	width:180px;
+	height:100%;
+	min-height:410px;
+	padding-left: 5px;
+	padding-top: 5px;
+	border-right:solid 1px black;
+}
+
+#main
+{
+	position:relative;
+	float:right;
+	width:550px;
+	height:auto;
+	padding-top: 5px;
+	padding-right: 10px;
+}
+
+#loading
+{
+	position:relative;
+	margin:auto auto;
+	width:400px;
+	height:75px;
+	text-align:center;
+	background:url(images/bigrotation2.gif) center no-repeat;
+	border:solid 1px black;
+	
+}
+
+.spacer
+{
+	width:100%;
+	height:10px;
+	border-top: solid 2px black;
+}
+
+#header .large
+{	
+	font-size: 24px;
+}
+
+#header .small
+{
+	font-size: 12px;
+}
+
+#header ul
+{
+	list-style: none;
+}
+
+#header
+{
+	border-bottom: 1px solid black;
+	padding-top: 5px;
+}
+
+#transFunds ul li
+{
+	list-style: none;
+	float:left;
+	position:relative;	
+	height:25px;
+	cursor:default;
+	width:33%;
+}
+
+#checkOrd
+{
+	margin-left:50px;
+}
+	
+#selectCheck
+{
+	float:left; 
+	width:100%;
+}
+
+#selectCheck .checkBox
+{
+	float:left; 
+	margin:7px; 
+	width:20%;
+}
+
+#selectCheck .check
+{
+	width:120px; 
+	height:50px; 
+	border:1px dotted blue;
+	background: url(images/check.jpg) center no-repeat;
+}
+
+#selectAccount
+{
+	float:left;
+	width:100%;
+	margin-top:25px;
+}
+
+#transferSuccessful
+{
+	position:relative;
+	width:400px;
+	height:35px;
+	margin:auto auto;
+	color:red;
+	display:none;
+}
+
+#transFunds .submit
+{
+	position:relative;
+	padding-left: 628px;
+	margin-top: 10px;
+	float:left;
+	height:auto;
+	width:auto;
+}
+
+#accounts
+{
+	position:relative;
+	width:90%;
+	height:300px;
+	margin:auto auto;
+	padding-bottom: 25px;
+}
+
+#accounts .accountType, #accounts .title
+{
+	position:relative;	
+	height:auto;
+	margin:auto auto;
+	padding: 5px;
+	overflow:hidden;	
+}
+
+#accounts .title
+{
+	width:90%;
+	margin-top:10px;
+	font-size: 16px;
+	font-weight: bold;
+	border:solid 1px #84B5E4;	
+	background: white url(images/collapse.gif) top right no-repeat;
+}
+
+#accounts span
+{
+	position:relative;	
+	width:auto;
+	float:right;	
+}
+
+#accounts ul
+{
+	list-style: none;
+	display:block;
+	margin:auto auto;
+}
+
+#accounts ul li
+{
+	position:relative;
+	float:left;
+	height:20px;
+	cursor:default;
+	width:50%;
+}
+
+#accounts .caccount, #accounts .saccount
+{
+	height:25px;	
+}
+
+#accounts .caccount:hover, #accounts .saccount:hover
+{
+	background:#BED8F1;	
+}
+
+#accounts .accountName
+{
+	font-style: italic;
+}
+
+#error
+{
+	color: Red;
+	font-size:small;
+}
+
+.welcome
+{
+	font-size:large;
+	width:100%;
+	height:auto;
+	padding-left:30px;
+}
+
+.expired
+{
+	margin:auto auto;
+	position:relative;
+	width:400px;
+	min-height:200px;
+	height:auto;
+	border:solid 1px green;
+	
+}
+
+#details
+{
+	position:relative;
+	width:90%;
+	height:300px;
+	margin:auto auto;
+}
+
+#scheduledpayments
+{
+	position:relative;
+	float:right;
+	width:350px;
+	height:auto;
+	min-height:200px;
+	border: solid 1px black 
+}
+
+#details .header, #scheduledpayments .header
+{
+	border-bottom:solid 1px black;		
+	background-color: #BED8F1;
+	padding-bottom:5px;
+	height:25px;
+}
+
+#details ul, #scheduledpayments ul
+{
+	list-style: none;
+	display:block;
+	margin:auto auto;	
+}
+
+#scheduledpayments .header ul li
+{
+	padding:2px;
+	position:relative;
+	float:left;
+	height:20px;
+	cursor:default;
+	width:25%;
+	padding-top:2px;
+}
+
+#details ul li
+{
+	position:relative;
+	float:left;
+	height:20px;
+	cursor:default;
+	width:25%;
+	padding-top:2px;
+}
+
+
+.scheduled ul
+{
+	padding:2px;
+}
+
+.scheduled ul li
+{
+	padding:2px;
+	position:relative;
+	float:left;
+	height:20px;
+	cursor:default;
+	width:25%;
+	padding-top:2px;
+}

@@ -1,0 +1,39 @@
+@CHARSET "ISO-8859-1";
+
+#navigation ul, #subnav ul
+{
+	list-style: none;
+	display: block;
+	padding: 0px;
+	margin: auto auto;	
+}
+
+#navigation ul li, #subnav ul li
+{
+	float:left;
+	position:relative;	
+	height:20px;	
+}
+
+#subnav ul li
+{
+	background:#84B5E4;
+}
+
+#navigation ul li, #navigation ul li:visited, #subnav ul li, #subnav ul li:visited
+{
+	width:150px;
+	height:20px;
+	display: block;
+	text-decoration: none;
+	overflow:hidden;
+	text-align: center;
+	color:black;
+}
+
+#navigation ul li:hover, #subnav ul li:hover, #logout:hover, #uUP:hover
+{
+	background: #BED8F1;
+	padding-top:2px;
+	cursor:pointer;	
+}
