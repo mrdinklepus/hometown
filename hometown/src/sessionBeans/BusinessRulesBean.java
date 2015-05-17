@@ -23,6 +23,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import entityBeans.Account;
+import entityBeans.AccountType;
 import entityBeans.Address;
 import entityBeans.Banktransaction;
 import entityBeans.Checkorder;
@@ -31,6 +32,7 @@ import entityBeans.Payments;
 import entityBeans.Person;
 import entityBeans.Personpayee;
 import entityBeans.Phone;
+import entityBeans.TransactionType;
 
 /**
  * @author MDWhite
@@ -44,6 +46,14 @@ public class BusinessRulesBean implements BusinessRulesRemote {
   
 	@PersistenceContext(name="hometownejb")
 	EntityManager em;
+	
+	/**
+	 * Ultimately, we should be creating a separate POJO and populating it with the return data
+	 * (rather than using the entity bean itself to pass the data back).  If we did it that way,
+	 * we wouldn't have to eagerly fetch the collection data.  In a real world application,
+	 * eagerly fetching all the data would be slow and memory heavy.  However, since this project
+	 * is just to play around, I'm not going to spend the time to switch it.
+	 */
 
 //  LOGIN  ****************************************************************************************
 	
@@ -245,8 +255,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 		set.add(payee);
 		String desc1 = "Billpay to " + payee.getCompany();
 		
-		Banktransaction trans = new Banktransaction(from, amount, "P", desc1, desc);
-		
+		Banktransaction trans = new Banktransaction(from, amount, TransactionType.BILL_PAY, desc1, desc);
 		trans.setPayeeCollection(set);
 		
 		em.merge(from);
@@ -268,34 +277,30 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
 	public void orderChecks(int fromAccountId, BigDecimal amount, String checkId) 
 	{	
-		Checkorder checks = new Checkorder();
-		
-		Account from = em.find(Account.class, fromAccountId);
-		if (from == null)
-		{
-			throw new EJBException("The account does not exist");
-		}
-		
-		if (from.getAccounttype().equals("R"))
-		{
-			from.debit(amount);
-		}
-		else
-		{
-			from.credit(amount);
-		}
-		
-		Person p = from.getPersonid();
-		int id = p.getPersonid();
-		Person person = em.find(Person.class, id);
-		
-		checks.placeOrder(amount, checkId, from, person);
-		
-		Banktransaction trans = new Banktransaction(from, amount, "P", "Checks Ordered", null);
-		
-		em.merge(from);
-		em.persist(checks);
-		em.persist(trans);		
+	  Checkorder checks = new Checkorder();
+    
+    Account from = em.find(Account.class, fromAccountId);
+    if (from == null)
+    {
+      throw new EJBException("The account does not exist");
+    }
+    
+    if (from.getAccounttype().equals(AccountType.CREDITCARD))
+    {
+      from.debit(amount);
+    }
+    else
+    {
+      from.credit(amount);
+    }
+    
+    checks.placeOrder(amount, checkId, from, from.getPersonid());
+    
+    Banktransaction trans = new Banktransaction(from, amount, TransactionType.CHECK_ORDER, "Checks Ordered", null);
+    
+//    em.merge(from);
+    em.persist(checks);
+    em.persist(trans);
 	}
 
 //  CREATE USER  ******************************************************************************
@@ -326,39 +331,40 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
 	public void transfer(int toId, int fromId, BigDecimal amount, String desc) 
 	{
-		Account toAccount = em.find(Account.class, toId);
-		Account fromAccount = em.find(Account.class, fromId);
-		
-		if (toAccount == null || fromAccount == null)
-		{
-			throw new EJBException("The To or From account does not exist");
-		}
-		
-		if (toAccount.getAccounttype().equals("R"))
-		{
-			toAccount.credit(amount);
-		}
-		else 
-		{
-			toAccount.debit(amount);
-		}
-		
-		if (fromAccount.getAccounttype().equals("R"))
-		{
-			fromAccount.debit(amount);
-		}
-		else
-		{
-			fromAccount.credit(amount);
-		}
-		Person p = fromAccount.getPersonid();
-		System.out.println("Personid" + p.getFirstname());
-			
-		Banktransaction aBankTransaction = new Banktransaction(toAccount, fromAccount, amount, "T", "Transfer", desc);
-		
-		em.merge(fromAccount);
-		em.merge(toAccount);	
-		em.persist(aBankTransaction);			
+	  Account toAccount = em.find(Account.class, toId);
+    Account fromAccount = em.find(Account.class, fromId);
+    
+    if (toAccount == null || fromAccount == null)
+    {
+      throw new EJBException("The To or From account does not exist");
+    }
+    
+    // Since a positive balance on a credit account works differently,
+    // treat it as a special case.
+    if (toAccount.getAccounttype().equals(AccountType.CREDITCARD))
+    {
+      toAccount.credit(amount);
+    }
+    else 
+    {
+      toAccount.debit(amount);
+    }
+    
+    if (fromAccount.getAccounttype().equals(AccountType.CREDITCARD))
+    {
+      fromAccount.debit(amount);
+    }
+    else
+    {
+      fromAccount.credit(amount);
+    }
+      
+    Banktransaction aBankTransaction = new Banktransaction(toAccount, fromAccount, amount,
+                                                           TransactionType.TRANSFER, "Transfer", desc);
+    
+//    em.merge(fromAccount);
+//    em.merge(toAccount);  
+    em.persist(aBankTransaction);
 	}
 
 //  ADD PAYEE  *************************************************************************************

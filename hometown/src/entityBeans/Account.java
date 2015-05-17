@@ -6,13 +6,13 @@ import java.util.Set;
 
 import javax.ejb.EJBException;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 
 @Entity
 public class Account implements Serializable {
@@ -20,7 +20,8 @@ public class Account implements Serializable {
 	@GeneratedValue
 	private int accountid;
 
-	private String accounttype;
+	@Enumerated(EnumType.STRING)
+  private AccountType accounttype;
 
 	private BigDecimal balance;
 
@@ -48,7 +49,7 @@ public class Account implements Serializable {
 		super();
 	}
 	
-	public Account(String accountType, BigDecimal balance, String accountno, Person personid){
+	public Account(AccountType accountType, BigDecimal balance, String accountno, Person personid){
 		this.accounttype = accountType;
 		this.balance = balance;
 		this.accountno = accountno;
@@ -63,11 +64,11 @@ public class Account implements Serializable {
 		this.accountid = accountid;
 	}
 
-	public String getAccounttype() {
+	public AccountType getAccounttype() {
 		return this.accounttype;
 	}
 
-	public void setAccounttype(String accounttype) {
+	public void setAccounttype(AccountType accounttype) {
 		this.accounttype = accounttype;
 	}
 

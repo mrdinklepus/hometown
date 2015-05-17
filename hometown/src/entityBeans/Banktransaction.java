@@ -3,7 +3,10 @@ package entityBeans;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
+
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -28,7 +31,8 @@ public class Banktransaction implements Serializable {
 	
 	private BigDecimal tobalance;
 
-	private String transtype;
+	@Enumerated(EnumType.STRING)
+  private TransactionType transtype;
 
 	private String timemade;
 	
@@ -60,7 +64,7 @@ public class Banktransaction implements Serializable {
 		super();
 	}
 
-	public Banktransaction(Account toAccount, Account fromAccount, BigDecimal amount, String transType){
+	public Banktransaction(Account toAccount, Account fromAccount, BigDecimal amount, TransactionType transType){
 		this.fromaccountid = fromAccount;
 		this.toaccountid = toAccount;
 		this.amount = amount;
@@ -71,7 +75,7 @@ public class Banktransaction implements Serializable {
 	}
 	
 	public Banktransaction(Account toAccount, Account fromAccount, 
-			BigDecimal amount, String transType, String description, String userdescription){
+			BigDecimal amount, TransactionType transType, String description, String userdescription){
 		
 		this.fromaccountid = fromAccount;
 		this.toaccountid = toAccount;
@@ -84,7 +88,7 @@ public class Banktransaction implements Serializable {
 		this.timemade = DateUtils.Now("dd-MMM-yy");			
 	}
 	
-	public Banktransaction(Account fromAccount, BigDecimal amount, String transType, String description, String userDescription) {
+	public Banktransaction(Account fromAccount, BigDecimal amount, TransactionType transType, String description, String userDescription) {
 
 		this.fromaccountid = fromAccount;
 		this.amount = amount;
@@ -119,11 +123,11 @@ public class Banktransaction implements Serializable {
 		this.amount = amount;
 	}
 
-	public String getTranstype() {
+	public TransactionType getTranstype() {
 		return this.transtype;
 	}
 
-	public void setTranstype(String transtype) {
+	public void setTranstype(TransactionType transtype) {
 		this.transtype = transtype;
 	}
 
