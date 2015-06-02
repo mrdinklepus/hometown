@@ -14,7 +14,7 @@ import org.junit.Test;
 import entityBeans.Account;
 import entityBeans.Payee;
 import entityBeans.Person;
-import entityBeans.Personpayee;
+import entityBeans.PayeeAccount;
 
 import sessionBeans.BusinessRulesBean;
 import sessionBeans.BusinessRulesRemote;

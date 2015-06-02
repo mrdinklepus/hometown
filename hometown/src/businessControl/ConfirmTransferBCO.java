@@ -48,7 +48,7 @@ public class ConfirmTransferBCO implements BCOInterface
 						Account fr = businessRulesRemote.getAccount(from);
 						BigDecimal balance = fr.getBalance();	
 						
-						if (balance.compareTo(amount) > 0 || fr.getAccounttype().equals("R"))
+						if (balance.compareTo(amount) > 0 || fr.getAccountType().equals("R"))
 						{
 							String toNum = req.getParameter("toAccount").toString();
 							String fromNum = req.getParameter("fromAccount").toString();

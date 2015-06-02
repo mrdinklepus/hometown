@@ -4,13 +4,15 @@
 		<jta-data-source>java:/MySQLDB</jta-data-source>
 		<class>entityBeans.Account</class>
 		<class>entityBeans.Address</class>
-		<class>entityBeans.Banktransaction</class>
+		<class>entityBeans.BankTransaction</class>
 		<class>entityBeans.Branch</class>
 		<class>entityBeans.Lookup</class>
 		<class>entityBeans.LookupPK</class>
 		<class>entityBeans.Payee</class>
 		<class>entityBeans.Person</class>
-		<class>entityBeans.Personpayee</class>
+		<class>entityBeans.PayeeAccountKey</class>
+		<class>entityBeans.PayeeAccount</class>
+		<class>entityBeans.Payments</class>
 		<class>entityBeans.Phone</class>
 		<class>entityBeans.Purchase</class>
 		<class>entityBeans.Security</class>

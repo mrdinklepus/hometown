@@ -5,13 +5,16 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 import javax.ejb.EJBException;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -27,21 +30,20 @@ public class Account implements Serializable {
 
 	private String accountno;
 
-	@ManyToOne
-	@JoinColumn(name="personid")
-	private Person personid;
+	@OneToMany(mappedBy="toaccountid", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private Set<BankTransaction> transactionsIn;
 
-	@OneToMany(mappedBy="toaccountid")
-	private Set<Banktransaction> banktransactionCollection;
-
-	@OneToMany(mappedBy="fromaccountid")
-	private Set<Banktransaction> banktransactionCollection2;
+	@OneToMany(mappedBy="fromaccountid", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private Set<BankTransaction> transactionsOut;
 	
-	@OneToMany(mappedBy="accountid")
-	private Set<Checkorder> orderCollection;
+	@OneToMany(mappedBy="accountid", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private Set<CheckOrder> checkOrders;
 	
-	@OneToMany(mappedBy="accountid")
-	private Set<Payments> paymentCollection;
+	@OneToMany(mappedBy="accountid", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private Set<Payments> payments;
+	
+	@ManyToMany(mappedBy="accounts")
+  private Set<Person> accountOwners;
 
 	private static final long serialVersionUID = 1L;
 
@@ -49,11 +51,11 @@ public class Account implements Serializable {
 		super();
 	}
 	
-	public Account(AccountType accountType, BigDecimal balance, String accountno, Person personid){
+	public Account(AccountType accountType, BigDecimal balance, String accountno, Set<Person> personid){
 		this.accounttype = accountType;
 		this.balance = balance;
 		this.accountno = accountno;
-		this.personid = personid;
+		this.accountOwners = personid;
 	}
 
 	public int getAccountid() {
@@ -64,11 +66,11 @@ public class Account implements Serializable {
 		this.accountid = accountid;
 	}
 
-	public AccountType getAccounttype() {
+	public AccountType getAccountType() {
 		return this.accounttype;
 	}
 
-	public void setAccounttype(AccountType accounttype) {
+	public void setAccountType(AccountType accounttype) {
 		this.accounttype = accounttype;
 	}
 
@@ -81,36 +83,36 @@ public class Account implements Serializable {
 		this.balance = balance;
 	}
 
-	public String getAccountno() {
+	public String getAccountNo() {
 		return this.accountno;
 	}
 
-	public void setAccountno(String accountno) {
+	public void setAccountNo(String accountno) {
 		this.accountno = accountno;
 	}
 
-	public Person getPersonid() {
-		return this.personid;
+	public Set<Person> getAccountOwners() {
+		return accountOwners;
 	}
 
-	public void setPersonid(Person personid) {
-		this.personid = personid;
+	public void setAccountOwners(Set<Person> accountOwners) {
+		this.accountOwners = accountOwners;
 	}
 
-	public Set<Banktransaction> getBanktransactionCollection() {
-		return this.banktransactionCollection;
+	public Set<BankTransaction> getTransactionsIn() {
+		return this.transactionsIn;
 	}
 
-	public void setBanktransactionCollection(Set<Banktransaction> banktransactionCollection) {
-		this.banktransactionCollection = banktransactionCollection;
+	public void setTransactionsIn(Set<BankTransaction> transactionsIn) {
+		this.transactionsIn = transactionsIn;
 	}
 
-	public Set<Banktransaction> getBanktransactionCollection2() {
-		return this.banktransactionCollection2;
+	public Set<BankTransaction> getTransactionsOut() {
+		return this.transactionsOut;
 	}
 
-	public void setBanktransactionCollection2(Set<Banktransaction> banktransactionCollection2) {
-		this.banktransactionCollection2 = banktransactionCollection2;
+	public void setTransactionsOut(Set<BankTransaction> transactionsOut) {
+		this.transactionsOut = transactionsOut;
 	}
 	
 	public String toString(){
@@ -141,31 +143,31 @@ public class Account implements Serializable {
 	}
 
 	/**
-	 * @return the orderCollection
+	 * @return the checkOrders
 	 */
-	public Set<Checkorder> getOrderCollection() {
-		return orderCollection;
+	public Set<CheckOrder> getCheckOrders() {
+		return checkOrders;
 	}
 
 	/**
-	 * @param orderCollection the orderCollection to set
+	 * @param checkOrders the checkOrders to set
 	 */
-	public void setOrderCollection(Set<Checkorder> orderCollection) {
-		this.orderCollection = orderCollection;
+	public void setCheckOrders(Set<CheckOrder> checkOrders) {
+		this.checkOrders = checkOrders;
 	}
 
 	/**
 	 * @return the paymentCollection
 	 */
-	public Set<Payments> getPaymentCollection() {
-		return paymentCollection;
+	public Set<Payments> getPayments() {
+		return payments;
 	}
 
 	/**
 	 * @param paymentCollection the paymentCollection to set
 	 */
-	public void setPaymentCollection(Set<Payments> paymentCollection) {
-		this.paymentCollection = paymentCollection;
+	public void setPayments(Set<Payments> paymentCollection) {
+		this.payments = paymentCollection;
 	}
 	
 	public String getType(){

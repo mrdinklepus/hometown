@@ -1,7 +1,9 @@
 package entityBeans;
 
 import java.io.Serializable;
+
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -9,11 +11,12 @@ import javax.persistence.ManyToOne;
 @Entity
 public class Purchase implements Serializable {
 	@Id
+	@GeneratedValue
 	private String purchaseid;
 
 	@ManyToOne
 	@JoinColumn(name="selltransactionid")
-	private Banktransaction selltransactionid;
+	private BankTransaction selltransactionid;
 
 	@ManyToOne
 	@JoinColumn(name="securityid")
@@ -21,7 +24,7 @@ public class Purchase implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name="buytransactionid")
-	private Banktransaction buytransactionid;
+	private BankTransaction buytransactionid;
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,11 +40,11 @@ public class Purchase implements Serializable {
 		this.purchaseid = purchaseid;
 	}
 
-	public Banktransaction getSelltransactionid() {
+	public BankTransaction getSelltransactionid() {
 		return this.selltransactionid;
 	}
 
-	public void setSelltransactionid(Banktransaction selltransactionid) {
+	public void setSelltransactionid(BankTransaction selltransactionid) {
 		this.selltransactionid = selltransactionid;
 	}
 
@@ -53,11 +56,11 @@ public class Purchase implements Serializable {
 		this.securityid = securityid;
 	}
 
-	public Banktransaction getBuytransactionid() {
+	public BankTransaction getBuytransactionid() {
 		return this.buytransactionid;
 	}
 
-	public void setBuytransactionid(Banktransaction buytransactionid) {
+	public void setBuytransactionid(BankTransaction buytransactionid) {
 		this.buytransactionid = buytransactionid;
 	}
 

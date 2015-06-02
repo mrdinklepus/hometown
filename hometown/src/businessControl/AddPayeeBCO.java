@@ -49,11 +49,9 @@ public class AddPayeeBCO implements BCOInterface{
 			{
 				businessRulesRemote.addPayee(uid, coname, street, city, state.toUpperCase(), zip, phone, accnum);
 				req.setAttribute("error", "suc");
-			}					
-			person = businessRulesRemote.getPersonPayee(uid);
-			
+			}
+			person = businessRulesRemote.getPerson(uid);
 		}catch(Exception e){
-			//req.setAttribute("error", "jndierror");
 			e.printStackTrace();
 		}
 		return person;		

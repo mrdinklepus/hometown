@@ -2,5 +2,5 @@ package entityBeans;
 
 public enum TransactionType
 {
-  TRANSFER, BILL_PAY, CHECK_ORDER, BUY, SELL;
+  DEPOSIT, WITHDRAWAL, TRANSFER, BILL_PAYMENT, CHECK_ORDER, BUY, SELL;
 }

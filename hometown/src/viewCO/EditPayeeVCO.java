@@ -1,6 +1,7 @@
 package viewCO;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,8 +18,8 @@ public class EditPayeeVCO implements VCOInterface {
 	{
 		System.out.println("in LoadEditPayeeVCO");
 		Payee p = (Payee)req.getAttribute("reqObject");
-		Address add = p.getAddressid();
-		Phone ph = p.getPhoneid();
+		Address add = p.getAddress();
+		Set<Phone> ph = p.getPhones();
 		req.setAttribute("address", add);
 		req.setAttribute("phone", ph);
 		

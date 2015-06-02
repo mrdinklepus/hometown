@@ -21,13 +21,12 @@ public class LoadManagePayeesBCO implements BCOInterface{
 		Person person = null;
 		Context jndiContext;
 		req.setAttribute("error", "");
-		//req.setAttribute("remsuc", "");
 		
 		try
 		{			
 			jndiContext = new InitialContext();
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);			
-			person = businessRulesRemote.getPersonPayee(uid);
+			person = businessRulesRemote.getPerson(uid);
 			
 		}catch(Exception e){
 			e.printStackTrace();

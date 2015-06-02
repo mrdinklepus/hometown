@@ -1,6 +1,3 @@
-/**
- * 
- */
 package businessControl;
 
 import javax.naming.InitialContext;
@@ -18,7 +15,6 @@ import sessionBeans.BusinessRulesRemote;
  */
 public class loginBCO implements BCOInterface
 {
-  
   public Object doSomething(HttpServletRequest req, HttpServletResponse resp)
   {
     String username = req.getParameter("uname");
@@ -28,7 +24,7 @@ public class loginBCO implements BCOInterface
     
     try
     {
-      BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote) InitialContext
+      BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)InitialContext
           .doLookup(BusinessRulesBean.RemoteJNDIName);
       person = businessRulesRemote.login(username, password);
     }

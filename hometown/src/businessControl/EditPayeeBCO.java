@@ -13,7 +13,8 @@ import sessionBeans.BusinessRulesRemote;
 import appcontroller.TinySession;
 import entityBeans.Payee;
 import entityBeans.Person;
-import entityBeans.Personpayee;
+import entityBeans.PayeeAccount;
+import entityBeans.PhoneType;
 
 public class EditPayeeBCO implements BCOInterface{
 
@@ -24,8 +25,8 @@ public class EditPayeeBCO implements BCOInterface{
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());
 		
 		int payeeid = Integer.parseInt(req.getParameter("payeeid"));
-		int addid = Integer.parseInt(req.getParameter("addressid")); 
-		int phoneid = Integer.parseInt(req.getParameter("phoneid"));
+//		int addid = Integer.parseInt(req.getParameter("addressid"));
+		PhoneType phoneid = PhoneType.valueOf(req.getParameter("phoneid"));
 		int ppid = Integer.parseInt(req.getParameter("ppid"));
 		String coname = req.getParameter("coname");
 		String street = req.getParameter("street");
@@ -58,22 +59,22 @@ public class EditPayeeBCO implements BCOInterface{
 			}
 			else
 			{					
-				businessRulesRemote.updatePayee(payeeid, addid, phoneid, ppid, coname, 
+				businessRulesRemote.updatePayee(payeeid, phoneid, ppid, coname, 
 								                street, city, state.toUpperCase(), zip, phone, accnum);
 				req.setAttribute("error", "suc");
 			}
 				
 			payee = businessRulesRemote.getpayeebyid(payeeid);
-			Person per = businessRulesRemote.getPersonPayee(uid);
+			Person per = businessRulesRemote.getPerson(uid);
 			
-			Set<Personpayee> spp = per.getPersonpayeeCollection();
+			Set<PayeeAccount> spp = per.getPayeeAccounts();
 			
-			Personpayee pp = null;
+			PayeeAccount pp = null;
 			
 			for (Iterator iterator = spp.iterator(); iterator.hasNext();)
 			{
-				Personpayee tpp = (Personpayee)iterator.next();
-				if (payee.getPayeeid() == (tpp.getPayeeid().getPayeeid()))
+				PayeeAccount tpp = (PayeeAccount)iterator.next();
+				if (payee.getPayeeid() == (tpp.getPayeeAccountKey().getPayeeid().getPayeeid()))
 				{
 					pp = tpp;
 					System.out.println("Personpayee found!");
@@ -82,10 +83,9 @@ public class EditPayeeBCO implements BCOInterface{
 			req.setAttribute("pp", pp);
 						
 			System.out.println("Got Payee");
-			System.out.println("account number is " + pp.getPayeeaccountno());
+			System.out.println("account number is " + pp.getPayeeAccountKey().getPayeeAccountNo());
 
-		}catch(Exception e){
-			//req.setAttribute("error", "jndierror");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return payee;		

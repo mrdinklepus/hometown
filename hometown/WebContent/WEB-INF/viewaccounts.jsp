@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
+<%@page import="entityBeans.AccountType"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
-<%@page import="entityBeans.Person, entityBeans.Personpayee, entityBeans.Account, entityBeans.Payee"%>
+<%@page import="entityBeans.Person, entityBeans.AccountType, entityBeans.Account"%>
 <%@page import="java.util.Iterator"%>
 <a id="PageTop" name="PageTop"></a>
 <script type="text/javascript">window.location.hash='PageTop';</script>
@@ -26,12 +27,13 @@
 <div id="test">
 <div class="title" onclick="toggle('checking');">Checking <span id="checkingtotal"></span></div>
 <div id="checking" class="accountType">			
-	<% for(Iterator it = person.getAccountCollection().iterator(); it.hasNext();) {
+	<% for (Iterator<Account> it = person.getAccounts().iterator(); it.hasNext();)
+	   {
 				Account aAccount = (Account)it.next();
-				if (aAccount.getAccounttype().equals("C")){ %>
+				if (aAccount.getAccountType() == AccountType.CHECKING) { %>
 	<div class="caccount">
 		<ul>
-			<li class="accountName" onclick="showAccountDetails(<%=aAccount.getAccountid()%>);"><%=aAccount.getAccountno()%></li>
+			<li class="accountName" onclick="showAccountDetails(<%=aAccount.getAccountid()%>);"><%=aAccount.getAccountNo()%></li>
 			<li>$<%=aAccount.getBalance()%></li>
 		</ul>
 	</div>
@@ -43,12 +45,12 @@
 <div id="test2">
 <div class="title" onclick="toggle('savings');">Savings<span id="savingstotal"></span></div>
 <div id="savings" class="accountType">	
-	<% for(Iterator it = person.getAccountCollection().iterator(); it.hasNext();) {
+	<% for(Iterator<Account> it = person.getAccounts().iterator(); it.hasNext();) {
 				Account aAccount = (Account)it.next();
-				if (aAccount.getAccounttype().equals("S")){ %>
+				if (aAccount.getAccountType() == AccountType.SAVINGS) { %>
 	<div class="saccount">
 		<ul>
-			<li class="accountName" onclick="showAccountDetails(<%=aAccount.getAccountid()%>);"><%=aAccount.getAccountno()%></li>
+			<li class="accountName" onclick="showAccountDetails(<%=aAccount.getAccountid()%>);"><%=aAccount.getAccountNo()%></li>
 			<li>$<%=aAccount.getBalance()%></li>
 		</ul>
 	</div>
@@ -59,12 +61,12 @@
 <div id="test3">
 <div class="title" onclick="toggle('credit');">Credit Cards <span id="credittotal"></span></div>
 <div id="credit" class="accountType">	
-	<% for(Iterator it = person.getAccountCollection().iterator(); it.hasNext();) {
+	<% for(Iterator<Account> it = person.getAccounts().iterator(); it.hasNext();) {
 				Account aAccount = (Account)it.next();
-				if (aAccount.getAccounttype().equals("R")){ %>
+				if (aAccount.getAccountType() == AccountType.CREDIT) { %>
 	<div class="saccount">
 		<ul>
-			<li class="accountName" onclick="showAccountDetails(<%=aAccount.getAccountid()%>);"><%=aAccount.getAccountno()%></li>
+			<li class="accountName" onclick="showAccountDetails(<%=aAccount.getAccountid()%>);"><%=aAccount.getAccountNo()%></li>
 			<li>$<%=aAccount.getBalance()%></li>
 		</ul>
 	</div>
@@ -73,14 +75,14 @@
 </div>
 
 <div id="test4">
-<div class="title" onclick="toggle('cashdeposit');">Cash Deposits <span id="cashdeposittotal"></span></div>
+<div class="title" onclick="toggle('cashdeposit');">Security <span id="cashdeposittotal"></span></div>
 <div id="cashdeposit" class="accountType">	
-	<% for(Iterator it = person.getAccountCollection().iterator(); it.hasNext();) {
+	<% for(Iterator<Account> it = person.getAccounts().iterator(); it.hasNext();) {
 				Account aAccount = (Account)it.next();
-				if (aAccount.getAccounttype().equals("U")){ %>
+				if (aAccount.getAccountType() == AccountType.SECURITY) { %>
 	<div class="saccount">
 		<ul>
-			<li class="accountName" onclick="showAccountDetails(<%=aAccount.getAccountid()%>);"><%=aAccount.getAccountno()%></li>
+			<li class="accountName" onclick="showAccountDetails(<%=aAccount.getAccountid()%>);"><%=aAccount.getAccountNo()%></li>
 			<li>$<%=aAccount.getBalance()%></li>
 		</ul>
 	</div>

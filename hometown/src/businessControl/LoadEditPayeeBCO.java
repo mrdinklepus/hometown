@@ -14,7 +14,7 @@ import sessionBeans.BusinessRulesBean;
 import sessionBeans.BusinessRulesRemote;
 import entityBeans.Payee;
 import entityBeans.Person;
-import entityBeans.Personpayee;
+import entityBeans.PayeeAccount;
 
 public class LoadEditPayeeBCO implements BCOInterface{
 	
@@ -22,7 +22,7 @@ public class LoadEditPayeeBCO implements BCOInterface{
 	{	
 		TinySession aSession = (TinySession) req.getAttribute("session"); 				
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());				
-		int payeeid = Integer.parseInt(req.getParameter("payeeid"));	
+		int payeeid = Integer.parseInt(req.getParameter("payeeid"));
 		req.setAttribute("error", "");
 		
 		Payee payee = null;
@@ -34,23 +34,23 @@ public class LoadEditPayeeBCO implements BCOInterface{
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 					
 			payee = businessRulesRemote.getpayeebyid(payeeid);
-			Person per = businessRulesRemote.getPersonPayee(uid);
+			Person per = businessRulesRemote.getPerson(uid);
 			
-			Set<Personpayee> spp = per.getPersonpayeeCollection();
+			Set<PayeeAccount> spp = per.getPayeeAccounts();
 			
-			Personpayee pp = null;
+			PayeeAccount pp = null;
 			
 			for (Iterator iterator = spp.iterator(); iterator.hasNext();)
 			{
-				Personpayee tpp = (Personpayee)iterator.next();
+				PayeeAccount tpp = (PayeeAccount)iterator.next();
 				
-				if (payee.getPayeeid() == (tpp.getPayeeid().getPayeeid()))
+				if (payee.getPayeeid() == (tpp.getPayeeAccountKey().getPayeeid().getPayeeid()))
 				{
 					pp = tpp;
 				}
 			}
 			req.setAttribute("pp", pp);
-			System.out.println("Account number is " + pp.getPayeeaccountno());
+			System.out.println("Account number is " + pp.getPayeeAccountKey().getPayeeAccountNo());
 			
 		}catch(Exception e){
 			e.printStackTrace();

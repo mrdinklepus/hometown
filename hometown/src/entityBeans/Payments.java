@@ -15,6 +15,8 @@ public class Payments implements Serializable {
 	private int paymentid;
 
 	private BigDecimal amount;
+	
+	private String paydate;
 
 	@ManyToOne
 	@JoinColumn(name="personid")
@@ -28,12 +30,20 @@ public class Payments implements Serializable {
 	@JoinColumn(name="payeeid")
 	private Payee payeeid;
 
-	private String paydate;
-
 	private static final long serialVersionUID = 1L;
 
-	public Payments() {
-		super();
+	public Payments()
+	{
+	  
+	}
+	
+	public Payments(Person person, Account a, Payee p, BigDecimal amount, String date) 
+	{
+    this.personid = person;
+    this.accountid = a;
+    this.payeeid = p;
+    this.amount = amount;
+    this.paydate = date;
 	}
 
 	public int getPaymentid() {

@@ -26,7 +26,6 @@ public class ViewAccountsBCO implements BCOInterface {
 			jndiContext = new InitialContext();
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);			
 			person = businessRulesRemote.getPerson(uid);
-			
 		}catch(Exception e){
 			e.printStackTrace();
 		}

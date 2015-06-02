@@ -3,13 +3,16 @@ package entityBeans;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
+
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 @Entity
 public class Security implements Serializable {
 	@Id
+	@GeneratedValue
 	private String securityid;
 
 	private BigDecimal rate;
@@ -20,8 +23,8 @@ public class Security implements Serializable {
 
 	private BigDecimal daystomaturity;
 
-	@OneToMany(mappedBy="securityid")
-	private Set<Purchase> purchaseCollection;
+//	@OneToMany(mappedBy="securityid")
+//	private Set<Purchase> purchaseCollection;
 
 	private static final long serialVersionUID = 1L;
 
@@ -69,12 +72,12 @@ public class Security implements Serializable {
 		this.daystomaturity = daystomaturity;
 	}
 
-	public Set<Purchase> getPurchaseCollection() {
-		return this.purchaseCollection;
-	}
-
-	public void setPurchaseCollection(Set<Purchase> purchaseCollection) {
-		this.purchaseCollection = purchaseCollection;
-	}
+//	public Set<Purchase> getPurchaseCollection() {
+//		return this.purchaseCollection;
+//	}
+//
+//	public void setPurchaseCollection(Set<Purchase> purchaseCollection) {
+//		this.purchaseCollection = purchaseCollection;
+//	}
 
 }

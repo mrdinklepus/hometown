@@ -2,11 +2,14 @@ package entityBeans;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -18,7 +21,7 @@ import javax.persistence.OneToMany;
 import util.DateUtils;
 
 @Entity
-public class Banktransaction implements Serializable {
+public class BankTransaction implements Comparable<BankTransaction>, Serializable {
 	@Id
 	@GeneratedValue
 	private int transactionid;
@@ -38,21 +41,21 @@ public class Banktransaction implements Serializable {
 	
 	private String userdescription;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="toaccountid")
 	private Account toaccountid;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="fromaccountid")
 	private Account fromaccountid;
 
-	@OneToMany(mappedBy="selltransactionid")
+	@OneToMany(mappedBy="selltransactionid", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private Set<Purchase> purchaseCollection;
 
-	@OneToMany(mappedBy="buytransactionid")
+	@OneToMany(mappedBy="buytransactionid", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private Set<Purchase> purchaseCollection2;
 
-	@ManyToMany
+	@ManyToMany(cascade=CascadeType.ALL)
 	@JoinTable(name="billpayment",
 		joinColumns=@JoinColumn(name="transactionid"),
 		inverseJoinColumns=@JoinColumn(name="payeeid"))
@@ -60,11 +63,12 @@ public class Banktransaction implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public Banktransaction() {
-		super();
+	public BankTransaction()
+	{
+		
 	}
 
-	public Banktransaction(Account toAccount, Account fromAccount, BigDecimal amount, TransactionType transType){
+	public BankTransaction(Account toAccount, Account fromAccount, BigDecimal amount, TransactionType transType){
 		this.fromaccountid = fromAccount;
 		this.toaccountid = toAccount;
 		this.amount = amount;
@@ -74,9 +78,9 @@ public class Banktransaction implements Serializable {
 		this.timemade = DateUtils.Now("dd-MMM-yy");	
 	}
 	
-	public Banktransaction(Account toAccount, Account fromAccount, 
-			BigDecimal amount, TransactionType transType, String description, String userdescription){
-		
+	public BankTransaction(Account toAccount, Account fromAccount, 
+			BigDecimal amount, TransactionType transType, String description, String userdescription)
+	{
 		this.fromaccountid = fromAccount;
 		this.toaccountid = toAccount;
 		this.amount = amount;
@@ -88,8 +92,9 @@ public class Banktransaction implements Serializable {
 		this.timemade = DateUtils.Now("dd-MMM-yy");			
 	}
 	
-	public Banktransaction(Account fromAccount, BigDecimal amount, TransactionType transType, String description, String userDescription) {
-
+	public BankTransaction(Account fromAccount, BigDecimal amount, TransactionType transType,
+	                       String description, String userDescription)
+	{
 		this.fromaccountid = fromAccount;
 		this.amount = amount;
 		this.frombalance = fromAccount.getBalance();
@@ -233,5 +238,22 @@ public class Banktransaction implements Serializable {
    */
   public void setUserdescription(String userdescription) {
     this.userdescription = userdescription;
+  }
+
+  @Override
+  public int compareTo(BankTransaction o)
+  {
+    if (transactionid < o.transactionid)
+    {
+      return -1;
+    }
+    else if (transactionid == o.transactionid)
+    {
+      return 0;
+    }
+    else
+    {
+      return 1;
+    }
   }
 }

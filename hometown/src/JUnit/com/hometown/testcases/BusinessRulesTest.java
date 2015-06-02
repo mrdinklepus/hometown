@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -15,12 +16,14 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 
 
+
+
 import org.junit.Test;
 
 import entityBeans.Account;
+import entityBeans.AccountType;
 import entityBeans.Person;
-import entityBeans.Personpayee;
-
+import entityBeans.PayeeAccount;
 import sessionBeans.BusinessRulesBean;
 import sessionBeans.BusinessRulesRemote;
 
@@ -39,7 +42,7 @@ public class BusinessRulesTest {
 		expectedPerson.setLastname("Flintstone");
 		expectedPerson.setFirstname("Fred");
 		expectedPerson.setMiddlename("F");
-		expectedPerson.setUserid("flintstonef");
+		expectedPerson.setUsername("flintstonef");
 		expectedPerson.setPassword("pebbles");
 		
 		Context jndiContext;
@@ -64,7 +67,7 @@ public class BusinessRulesTest {
 		expectedPerson.setLastname("Flintstone");
 		expectedPerson.setFirstname("Fred");
 		expectedPerson.setMiddlename("F");
-		expectedPerson.setUserid("flintstonef");
+		expectedPerson.setUsername("flintstonef");
 		expectedPerson.setPassword("pebbles");
 		
 		Context jndiContext;
@@ -89,7 +92,7 @@ public class BusinessRulesTest {
 		aPerson.setFirstname("Kaleb");
 		aPerson.setMiddlename("Keith");
 		aPerson.setLastname("Scholes");
-		aPerson.setUserid("scholesk");
+		aPerson.setUsername("scholesk");
 		
 		
 		Context jndiContext;
@@ -129,60 +132,65 @@ public class BusinessRulesTest {
 	}
 	
 	//@Test
-	public void testGetPersonPayees(){
-		HashMap<String, Personpayee> map = new HashMap<String, Personpayee>();
-		
-		Personpayee aPersonPayee = new Personpayee();
-			aPersonPayee.setPersonpayeeid(4);
-			aPersonPayee.setPayeeaccountno("83715712");
-		
-		Personpayee bPersonPayee = new Personpayee();
-			bPersonPayee.setPersonpayeeid(2);
-			bPersonPayee.setPayeeaccountno("793135");	
-		
-		Personpayee cPersonPayee = new Personpayee();
-			cPersonPayee.setPersonpayeeid(3);
-			cPersonPayee.setPayeeaccountno("775313");	
-		
-			
-		map.put("4", aPersonPayee);
-		map.put("2", bPersonPayee);
-		map.put("3", cPersonPayee);
-			
-		Context jndiContext;
-		
-		
-		try{
-			jndiContext = new InitialContext();
-			
-			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
-			//Set<Personpayee> payees = businessRulesRemote.getPersonPayee("flintstonef");
-			
-			//assertEquals(payees.size(), 3);
-				
-			//Iterator<Personpayee> it = payees.iterator();
-			
-//			while(it.hasNext()){
-//				Personpayee pp = (Personpayee)it.next();
-//				Personpayee local = map.get(pp.getPersonpayeeid());
-//				assertEquals(local, pp);
-//			}
-			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
+//	public void testGetPersonPayees(){
+//		HashMap<String, PersonPayeeAccount> map = new HashMap<String, PersonPayeeAccount>();
+//		
+//		PersonPayeeAccount aPersonPayee = new PersonPayeeAccount();
+//			aPersonPayee.setPersonpayeeid(4);
+//			aPersonPayee.setPayeeaccountno("83715712");
+//		
+//		PersonPayeeAccount bPersonPayee = new PersonPayeeAccount();
+//			bPersonPayee.setPersonpayeeid(2);
+//			bPersonPayee.setPayeeaccountno("793135");	
+//		
+//		PersonPayeeAccount cPersonPayee = new PersonPayeeAccount();
+//			cPersonPayee.setPersonpayeeid(3);
+//			cPersonPayee.setPayeeaccountno("775313");	
+//		
+//			
+//		map.put("4", aPersonPayee);
+//		map.put("2", bPersonPayee);
+//		map.put("3", cPersonPayee);
+//			
+//		Context jndiContext;
+//		
+//		
+//		try{
+//			jndiContext = new InitialContext();
+//			
+//			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
+//			//Set<Personpayee> payees = businessRulesRemote.getPersonPayee("flintstonef");
+//			
+//			//assertEquals(payees.size(), 3);
+//				
+//			//Iterator<Personpayee> it = payees.iterator();
+//			
+////			while(it.hasNext()){
+////				Personpayee pp = (Personpayee)it.next();
+////				Personpayee local = map.get(pp.getPersonpayeeid());
+////				assertEquals(local, pp);
+////			}
+//			
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}
+//	}
 	
 	@Test
-	public void testMakeTransfer(){
+	public void testMakeTransfer()
+	{
 		Person aPerson = new Person();
-			aPerson.setPersonid(1);
-		Account aAccount = new Account("C", new BigDecimal("6000.00"), "1001", aPerson);
-		Account bAccount = new Account("R", new BigDecimal("4000.00"), "50101", aPerson);
+		aPerson.setPersonid(1);
+		Set<Person> persons = new HashSet<>();
+		persons.add(aPerson);
+		Account aAccount = new Account(AccountType.CHECKING, new BigDecimal("6000.00"), "1001", persons);
+		Account bAccount = new Account(AccountType.CREDIT, new BigDecimal("4000.00"), "50101", persons);
 		
 		Context jndiContext;
 		BusinessRulesRemote businessRulesRemote = null;
-		try{
+		
+		try
+		{
 			jndiContext = new InitialContext();
 			
 			businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);

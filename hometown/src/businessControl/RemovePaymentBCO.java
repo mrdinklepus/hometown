@@ -32,7 +32,7 @@ public class RemovePaymentBCO implements BCOInterface {
 			
 			req.setAttribute("error", "remsuc");
 			req.setAttribute("remsuc", pname);			
-			person = businessRulesRemote.getPersonPayee(uid);
+			person = businessRulesRemote.getPerson(uid);
 			
 		}catch(Exception e){
 			e.printStackTrace();

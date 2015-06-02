@@ -75,11 +75,11 @@ public class PayBillBCO implements BCOInterface
 						{
 							Account fr = businessRulesRemote.getAccount(accountId);
 							BigDecimal balance = fr.getBalance();	
-							if (balance.compareTo(amount) > 0 || fr.getAccounttype().equals("R"))
+							if (balance.compareTo(amount) > 0 || fr.getAccountType().equals("R"))
 							{
 								String desc = args[3];
 								businessRulesRemote.payBill(accountId, payeeId, amount, desc);
-								person = businessRulesRemote.getPersonPayee(uid);
+								person = businessRulesRemote.getPerson(uid);
 								req.setAttribute("success", "suc");
 							}
 							else
@@ -100,7 +100,7 @@ public class PayBillBCO implements BCOInterface
 				if(!test2)
 				{
 					list1.add(businessRulesRemote.getpayeebyid(payeeId).getCompany());
-					person = businessRulesRemote.getPersonPayee(uid);
+					person = businessRulesRemote.getPerson(uid);
 					test2 = true;
 				}											
 			}

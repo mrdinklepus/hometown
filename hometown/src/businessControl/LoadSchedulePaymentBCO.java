@@ -28,8 +28,8 @@ public class LoadSchedulePaymentBCO implements BCOInterface {
 			jndiContext = new InitialContext();
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 			
-			person = businessRulesRemote.getPersonPayee(uid);			
-			System.out.println("Collection Size is " + person.getPaymentCollection().size());
+			person = businessRulesRemote.getPerson(uid);			
+			System.out.println("Collection Size is " + person.getScheduledPayments().size());
 			
 		}catch(Exception e){
 			e.printStackTrace();

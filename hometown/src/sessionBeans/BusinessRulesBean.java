@@ -25,13 +25,14 @@ import javax.persistence.TypedQuery;
 import entityBeans.Account;
 import entityBeans.AccountType;
 import entityBeans.Address;
-import entityBeans.Banktransaction;
-import entityBeans.Checkorder;
+import entityBeans.BankTransaction;
+import entityBeans.CheckOrder;
 import entityBeans.Payee;
 import entityBeans.Payments;
 import entityBeans.Person;
-import entityBeans.Personpayee;
+import entityBeans.PayeeAccount;
 import entityBeans.Phone;
+import entityBeans.PhoneType;
 import entityBeans.TransactionType;
 
 /**
@@ -40,8 +41,7 @@ import entityBeans.TransactionType;
 @Stateless
 public class BusinessRulesBean implements BusinessRulesRemote {
 
-//	public static final String RemoteJNDIName = BusinessRulesBean.class.getSimpleName() + "/remote";
-//	public static final String LocalJNDIName = BusinessRulesBean.class.getSimpleName() + "/local";
+//	public static final String RemoteJNDIName = BusinessRulesBean.class.getSimpleName() + "/remote"; (the OLD way)
   public static final String RemoteJNDIName = "java:app/hometown/BusinessRulesBean!sessionBeans.BusinessRulesRemote";
   
 	@PersistenceContext(name="hometownejb")
@@ -60,16 +60,19 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRED)
 	public Person login(String username, String password) 
 	{
-		Query query = em.createQuery("SELECT p FROM Person p" +
-									" WHERE p.userid = :userid AND p.password = :password");
-		query.setParameter("userid", username);
+		TypedQuery<Person> query = em.createNamedQuery("Person.findByUserPass", Person.class);
+		query.setParameter("username", username);
 		query.setParameter("password", password);
 		
-		return (Person)query.getSingleResult();			
+		return query.getSingleResult();			
 	}
 	
 //	SIGNUP  ****************************************************************************************	
 	
+	/**
+	 * Based on the assumption the customer has already created an account at a local branch
+	 * which includes full name and phone number
+	 */
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRED)
 	public String signup(String firstName, String lastName, String phone, String username, String pw)
 	{
@@ -81,8 +84,8 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 		try
 		{
 			TypedQuery<Person> query = em.createQuery("SELECT DISTINCT p from Person p" +
-					" WHERE UPPER(p.firstname) = :firstname " +
-					" AND UPPER(p.lastname) = :lastname", Person.class);
+                                      					" WHERE UPPER(p.firstname) = :firstname " +
+                                      					" AND UPPER(p.lastname) = :lastname", Person.class);
 			query.setParameter("firstname", firstName.toUpperCase());
 			query.setParameter("lastname", lastName.toUpperCase());
 			List<Person> personlist = query.getResultList();
@@ -92,31 +95,28 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 				message = "The first and last name entered do not exist in our database!";
 			}
 			
-			Iterator it1 = personlist.iterator();
-			while (it1.hasNext())
-			{			
-				Person p = (Person)it1.next();
+			for (Person p : personlist)
+			{
 				System.out.println("Personid is " + p.getPersonid());
-				if (p.getPhoneCollection() != null)
+				if (p.getPhones() != null)
 				{
-					pset = p.getPhoneCollection();
+					pset = p.getPhones();
 					System.out.println("pset size is " + pset.size());
 				}
 				
-				Iterator it2 = pset.iterator();
-				while (it2.hasNext())
+				for (Phone existingPhone : pset)
 				{
-					Phone existingPhone = (Phone)it2.next();
-					System.out.println("personphone is " + existingPhone.getPhone());
-					if (phone.equals(existingPhone.getPhone()))
+					System.out.println("personphone is " + existingPhone.getPhoneNumber());
+					if (phone.equals(existingPhone.getPhoneNumber()))
 					{
 						System.out.println("phone found");
-						if (p.getUserid().isEmpty())
+						if (p.getUsername().isEmpty())
 						{
 							System.out.println("updating person");
-							p.setUserid(username);
+							p.setUsername(username);
 							p.setPassword(pw);
 							em.merge(p);
+							//TODO change
 							message = "suc";
 							break;
 						}
@@ -142,7 +142,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
       message = "**The name entered does not exist in our database.**";
     }
     
-    if (message.equals(""))
+    if (message.isEmpty())
     {
       message = "**No match was found for the entered phone number.**";
     }
@@ -154,7 +154,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
 	public void createPerson(Person person) 
 	{		
-		em.persist(person);				
+		em.persist(person);			
 	}
 
 //  UPDATE PERSON  ***********************************************************************************
@@ -170,12 +170,11 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
 	public Account getAccount(int accountid)
 	{		
-		Query query = em.createQuery("SELECT DISTINCT a from Account a " +
-				"LEFT JOIN FETCH a.banktransactionCollection " +
-				"LEFT JOIN FETCH a.banktransactionCollection2 " +
-				"WHERE a.accountid = :accountid");
+		TypedQuery<Account> query = em.createQuery("SELECT a from Account a" +
+                        				               " WHERE a.accountid = :accountid",
+                        				               Account.class);
 		query.setParameter("accountid", accountid);
-		Account account = (Account)query.getSingleResult();	
+		Account account = query.getSingleResult();
 		
 		return account;
 	}
@@ -184,47 +183,35 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRED)
 	public Person getPerson(int personId) 
-	{		
-		Query query = em.createQuery("SELECT DISTINCT p from Person p " +
-		"LEFT JOIN FETCH p.personpayeeCollection " +
-		"LEFT JOIN FETCH p.accountCollection " +
-		"WHERE p.personid = :pid");
-		
-		query.setParameter("pid", personId);
-		Person person = (Person)query.getSingleResult();		
-		System.out.println(person.getFullname());
-		
-		return person;
+	{
+	  return em.find(Person.class, personId);
 	}
 
-//  GET PERSON ACCOUNTS  ********************************************************************************
+//  GET ACCOUNTS  ********************************************************************************
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRED)
-	public Set<Account> getPersonAccounts(int pid) 
+	public Collection<Account> getPersonAccounts(int pid) 
 	{
-		Query query = em.createQuery("SELECT DISTINCT p from Person p " +
-									"LEFT JOIN FETCH p.accountCollection " +
-									"WHERE p.personid = :pid");
+		TypedQuery<Account> query = em.createQuery("SELECT a from Account a" +
+									                             " WHERE a.personid = :pid",
+									                             Account.class);
 		query.setParameter("pid", pid);
-		Person person = (Person)query.getSingleResult();
-		
-		Set<Account> accounts = person.getAccountCollection();
+		Collection<Account> accounts = query.getResultList();
 		return accounts;
 	}
 
-//  GET PERSONPAYEE  ****************************************************************************
+//  GET PERSONPAYEES  ****************************************************************************
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRED)
-	public Person getPersonPayee(int pid)
+	public Collection<Payee> getPersonPayees(int pid)
 	{
-		Query query = em.createQuery("SELECT DISTINCT p from Person p " +
-									"LEFT JOIN FETCH p.personpayeeCollection " +
-									"LEFT JOIN FETCH p.accountCollection " +
-									"LEFT JOIN FETCH p.paymentCollection " +
-									"WHERE p.personid = :pid");
-		query.setParameter("pid", pid);
-		Person person = (Person)query.getSingleResult();			
-		return person;
+	  Set<Payee> payees = new HashSet<>();
+	  Person person = em.find(Person.class, pid);
+	  for (PayeeAccount pp : person.getPayeeAccounts())
+	  {
+	    payees.add(pp.getPayeeAccountKey().getPayeeid());
+	  }	
+		return payees;
 	}
 
 // PAY BILL  ***********************************************************************************
@@ -239,7 +226,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 			throw new EJBException("The account does not exist");
 		}
 		
-		if (from.getAccounttype().equals("R"))
+		if (from.getAccountType().equals("R"))
 		{
 			from.debit(amount);
 		}
@@ -255,7 +242,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 		set.add(payee);
 		String desc1 = "Billpay to " + payee.getCompany();
 		
-		Banktransaction trans = new Banktransaction(from, amount, TransactionType.BILL_PAY, desc1, desc);
+		BankTransaction trans = new BankTransaction(from, amount, TransactionType.BILL_PAYMENT, desc1, desc);
 		trans.setPayeeCollection(set);
 		
 		em.merge(from);
@@ -269,23 +256,21 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	{	
 		Account from = em.find(Account.class, fromAccountId);
 		from.debit(amount);
-		em.merge(from);	
+//		em.merge(from);
 	}
 
 //  ORDER CHECKS  ********************************************************************************
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
 	public void orderChecks(int fromAccountId, BigDecimal amount, String checkId) 
-	{	
-	  Checkorder checks = new Checkorder();
-    
+	{
     Account from = em.find(Account.class, fromAccountId);
     if (from == null)
     {
       throw new EJBException("The account does not exist");
     }
     
-    if (from.getAccounttype().equals(AccountType.CREDITCARD))
+    if (from.getAccountType().equals(AccountType.CREDIT))
     {
       from.debit(amount);
     }
@@ -294,36 +279,13 @@ public class BusinessRulesBean implements BusinessRulesRemote {
       from.credit(amount);
     }
     
-    checks.placeOrder(amount, checkId, from, from.getPersonid());
-    
-    Banktransaction trans = new Banktransaction(from, amount, TransactionType.CHECK_ORDER, "Checks Ordered", null);
+    CheckOrder order = new CheckOrder();
+    order.placeOrder(amount, checkId, from);
+    BankTransaction trans = new BankTransaction(from, amount, TransactionType.CHECK_ORDER, "Checks Ordered", null);
     
 //    em.merge(from);
-    em.persist(checks);
+    em.persist(order);
     em.persist(trans);
-	}
-
-//  CREATE USER  ******************************************************************************
-	
-	@TransactionAttribute(value=TransactionAttributeType.REQUIRED)
-	public Person createUser(String accountNumber, String userid, String pw) 
-	{
-		Query query = em.createQuery("SELECT DISTINCT a from Account a " +
-				"LEFT JOIN FETCH a.personId " +
-				"WHERE accountNumber = :accountNum");
-		query.setParameter("accountNum", accountNumber);
-		
-		Account a = (Account)query.getSingleResult();
-		if (a == null)
-		{
-			throw new EJBException("The account does not exist");
-		}
-		Person person = a.getPersonid();
-		person.setUserid(userid);
-		person.setPassword(pw);
-		
-		em.merge(person);
-		return person;
 	}
 
 //  TRANSFER FUNDS  *******************************************************************************
@@ -341,7 +303,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
     
     // Since a positive balance on a credit account works differently,
     // treat it as a special case.
-    if (toAccount.getAccounttype().equals(AccountType.CREDITCARD))
+    if (toAccount.getAccountType().equals(AccountType.CREDIT))
     {
       toAccount.credit(amount);
     }
@@ -350,7 +312,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
       toAccount.debit(amount);
     }
     
-    if (fromAccount.getAccounttype().equals(AccountType.CREDITCARD))
+    if (fromAccount.getAccountType().equals(AccountType.CREDIT))
     {
       fromAccount.debit(amount);
     }
@@ -359,7 +321,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
       fromAccount.credit(amount);
     }
       
-    Banktransaction aBankTransaction = new Banktransaction(toAccount, fromAccount, amount,
+    BankTransaction aBankTransaction = new BankTransaction(toAccount, fromAccount, amount,
                                                            TransactionType.TRANSFER, "Transfer", desc);
     
 //    em.merge(fromAccount);
@@ -371,144 +333,83 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
 	public void addPayee(int uid, String coname, String street, String city, 
-			String state, String zip, String phone, String accnum)
+			                 String state, String zip, String phone, String accnum)
 	{
-		
-//Address Check
-		Address add = null;
-		System.out.println("This is the Street!" + street);
-		try
-		{
-			Query query2 = em.createQuery("SELECT DISTINCT a from Address a " +
-										"WHERE street1 = :street and city = :city" );
-			query2.setParameter("street", street);
-			query2.setParameter("city", city);
-			//query2.setParameter("state", state);
-			System.out.println("query");
-			add = (Address)query2.getSingleResult();
-		}catch (NoResultException ex){
-			System.out.println("createNew");
-			add = new Address(street, city, state, zip);				
-		}
-		em.persist(add);			
+	  // Address
+		Address add = new Address(street, city, state, zip);
+//		em.persist(add);
 
-//Phone Check
-		Phone ph = null;
-		if (phone.compareTo("") != 0)
+		// Phone Check
+		Set<Phone> phoneCollection = new HashSet<>();
+		Phone newPhone = null;
+		if (!phone.isEmpty())
 		{
-			System.out.println("Phone is not blank " + phone);	
-			try
-			{
-				Query query = em.createQuery("SELECT DISTINCT p from Phone p " +
-											"WHERE phone = :phoneNum");
-				query.setParameter("phoneNum", phone);				
-				ph = (Phone)query.getSingleResult();				
-			}
-			catch (NoResultException ex){
-				ph = new Phone();
-				ph.createPhone(phone);				
-			}			
-			em.persist(ph);				
+		  System.out.println("Creating New Phone...");
+		  newPhone = new Phone(phone, PhoneType.WORK);
+		  phoneCollection.add(newPhone);
+//			em.persist(newPhone);
 		}
 		
-//Add Payee		
+		// Add Payee		
 		Payee payee = new Payee();
-		
-		if (ph != null)
-		{
-			payee.addPayee(coname, add, ph);
-		}
-		else
-		{
-			payee.addPayeenophone(coname, add);
-		}
-		em.persist(payee);		
-		
-		Query query = em.createQuery("SELECT DISTINCT p from Person p " +
-				"LEFT JOIN FETCH p.personpayeeCollection " +
-				"LEFT JOIN FETCH p.accountCollection " +
-				"WHERE p.personid = :pid");
-		query.setParameter("pid", uid);
-		Person p = (Person)query.getSingleResult();
-		
-		Personpayee pp = new Personpayee();
-		pp.createPP(accnum, p, payee);
-		em.persist(pp);			
+		payee.addPayee(coname, add, phoneCollection);
+		em.persist(payee);
+
+		PayeeAccount pp = new PayeeAccount(accnum, getPerson(uid), payee);
+		em.persist(pp);
 	}
 	
 //  UPDATE PAYEE  ***************************************************************************
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRED)
-	public void updatePayee(int payeeid, int addid, int phoneid, int ppid, String coname, String street, String city, 
-			String state, String zip, String phone, String accnum)
-	{	
-		Payee p1 = em.find(Payee.class, payeeid);
-		Address add = em.find(Address.class, addid);
-		Personpayee pp1 = em.find(Personpayee.class, ppid);
-		Phone ph1 = null;
-		Phone ph = null;
-		int i = 0;
+	public void updatePayee(int payeeid, PhoneType phonetype, int ppid,
+	                        String coname, String street, String city, 
+			                    String state, String zip, String phone, String accnum)
+	{
+		Payee existingPayee = em.find(Payee.class, payeeid);
 		
-		if (phoneid != 0)
+		Collection<Phone> existingPhone = existingPayee.getPhones();
+		if (phonetype != null)
 		{
-			System.out.println("Phone id is " + phoneid);
-			ph1 = em.find(Phone.class, phoneid);
-			
-			if (phone.compareTo("") == 0)
-			{		
-				try
-				{
-					System.out.println("running query");
-					Query query1 = em.createQuery("SELECT DISTINCT p from Payee p " +
-												"WHERE p.phoneid = :phoneId " +
-												"AND p.payeeid != :payid");
-					query1.setParameter("phoneId", ph1);
-					query1.setParameter("payid", payeeid);
-					query1.getSingleResult();	
-					System.out.println("Another Payee has phone number");
-					p1.setPhoneid(ph);
-				}catch (NoResultException ex){
-					System.out.println("Removing Phone number");
-					p1.setPhoneid(ph);
-					em.merge(p1);
-					em.remove(ph1);
-				}				
-			}
-			else
-			{					
-				ph1.setPhone(phone);
-				em.merge(ph1);
-			}
+		  boolean phoneAdded = false;
+  		if (existingPhone != null)
+  		{
+  		  for (Phone p : existingPhone)
+  		  {
+  		    if (p.getPhonetype() == phonetype || phone.equals(p.getPhoneNumber()))
+  		    {
+  		      p.setPhoneNumber(phone);
+  		      phoneAdded = true;
+  		      break;
+  		    }
+  		  }
+  		}
+  		
+  		if (!phoneAdded)
+  		{
+  		  // Need to add this as new
+  		  Phone newPhone = new Phone(phone, phonetype);
+  		  existingPhone.add(newPhone);
+  		}
 		}
 		else
-		{			
-			if (phone.compareTo("") != 0)
-			{
-				ph1 = new Phone();
-				ph1.createPhone(phone);
-				em.persist(ph1);
-				i = 1;
-			}
-		}
-		add.setStreet1(street);
+    {     
+      if (!phone.isEmpty())
+      {
+        Phone newPhone = new Phone(phone, PhoneType.WORK);
+        existingPhone.add(newPhone);
+      }
+    }
+		
+		Address add = existingPayee.getAddress();
+		add.setStreet(street);
 		add.setCity(city);
 		add.setState(state);
 		add.setZipcode(zip);
-		em.merge(add);
-		
-		if (i != 1)
-		{
-			p1.setCompany(coname);
-		}
-		else
-		{
-			p1.setCompany(coname);
-			p1.setPhoneid(ph1);
-		}
-		em.merge(p1);
-		    
-		pp1.setPayeeaccountno(accnum);
-		em.merge(pp1);		
+    existingPayee.setCompany(coname);
+    
+		PayeeAccount pp = em.find(PayeeAccount.class, ppid);
+		pp.getPayeeAccountKey().setPayeeAccountNo(accnum);
 	}
 
 //  REMOVE PAYEE  ***************************************************************************
@@ -516,52 +417,34 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
 	public Person removePayee(int uid, int payeeid)
 	{
-		Collection pp;
-		boolean test = false;
-		Query query = em.createQuery("SELECT DISTINCT p from Person p " +
-				"LEFT JOIN FETCH p.personpayeeCollection " +
-				"WHERE p.personid = :userId");
-		query.setParameter("userId", uid);
-		Person person = (Person)query.getSingleResult();			
+//		Query query = em.createQuery("SELECT p from Person p " +
+//				                         "LEFT JOIN FETCH p.personpayeeCollection " +
+//				                         "WHERE p.personid = :userId");
+//		query.setParameter("userId", uid);
+		Person person = em.find(Person.class,  uid);
+		Collection<PayeeAccount> pp = person.getPayeeAccounts();
 		
-		pp = person.getPersonpayeeCollection();
-		for (Iterator iterator = pp.iterator(); iterator.hasNext();) 
+		for (PayeeAccount ppayee : pp) 
 		{
-			Personpayee ppayee = (Personpayee) iterator.next();
-			Payee payee = ppayee.getPayeeid();
+			Payee payee = ppayee.getPayeeAccountKey().getPayeeid();
 			if (payee.getPayeeid() == payeeid)	
 			{
 				pp.remove(ppayee);
-				System.out.println("payee id is " + payee.getPayeeid());
 				em.remove(ppayee);
 				
 				try
 				{
-					Query query1 = em.createQuery("SELECT DISTINCT p from Payments p " +
-												"WHERE p.payeeid = :payeeId");
-					query1.setParameter("payeeId", payee);
-					query1.getSingleResult();	
-					test = true;
-					
+					Query query = em.createQuery("DELETE FROM Payments p" +
+												                " WHERE p.payeeid = :payeeId");
+					query.setParameter("payeeId", payee);
+					query.executeUpdate();
 				}catch (NoResultException ex){
 					ex.printStackTrace();
-				}
-				if (test == false)
-				{
-					System.out.println("Removing payee from database");
-					Phone ph = payee.getPhoneid();
-					Address add = payee.getAddressid();
-					em.remove(payee);
-					if (ph != null)
-					{
-						em.remove(ph);
-					}
-					em.remove(add);
-				}				
+				}		
 				break;
 			}			
 		}
-		em.merge(person);		
+		em.merge(person);
 		return person;
 	}
 
@@ -574,51 +457,42 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 		Account from = em.find(Account.class, fromac);
 		Payee payee = em.find(Payee.class, payeeid);
 		
-		Payments payment = new Payments();
-		payment.schedulePay(person, from, payee, amount, date);
-		
+		Payments payment = new Payments(person, from, payee, amount, date);		
 		em.persist(payment);				
 	}
 
 //  REMOVE PAYMENT  ****************************************************************************
 	
 	@Override
+	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
 	public String removePayment(int uid, int paymentid) 
 	{		
-		String co = "";
-		Query query = em.createQuery("SELECT DISTINCT p from Person p " +
-				"LEFT JOIN FETCH p.paymentCollection " +
-				"WHERE p.personid = :userId");
-		query.setParameter("userId", uid);
-		Person person = (Person)query.getSingleResult();
+		String company = "";
+		Person person = em.find(Person.class, uid);
 		
-		for(Iterator i = person.getPaymentCollection().iterator(); i.hasNext();)
+		Collection<Payments> personPayments = person.getScheduledPayments();
+		for (Payments payment : personPayments)
 		{
-			Payments payment = (Payments)i.next();
-			
 			if (payment.getPaymentid() == paymentid)
 			{
-				person.getPaymentCollection().remove(payment);
-				em.remove(payment);
-				co = payment.getPayeeid().getCompany();
+			  personPayments.remove(payment);
+//				em.remove(payment);
+				company = payment.getPayeeid().getCompany();
 				break;
 			}
 		}
-		em.merge(person);
-		return co;
+		return company;
 	}
 
 //  GET TRANSACTIONS  ********************************************************************************
 	
-	public List<Banktransaction> getTransactions(Account accountid)
+	public List<BankTransaction> getTransactions(Account accountid)
 	{	
-		Query query = em.createQuery("SELECT DISTINCT b from Banktransaction b " +
-				"LEFT JOIN FETCH b.fromaccountid " +
-				"LEFT JOIN FETCH b.toaccountid " +
-				"WHERE b.fromaccountid = :acc or b.toaccountid = :acc " +
-				"ORDER BY transactionid asc"); 
+		TypedQuery<BankTransaction> query = em.createQuery("SELECT b FROM Banktransaction b " +
+                                                			 "WHERE b.fromaccountid = :acc OR b.toaccountid = :acc " +
+                                                			 "ORDER BY transactionid asc", BankTransaction.class); 
 		query.setParameter("acc", accountid);
-		List<Banktransaction> list1 = (List)query.getResultList();
+		List<BankTransaction> list1 = query.getResultList();
 		
 		return list1;
 	}
@@ -627,51 +501,42 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	
 	public Payee getpayeebyid(int payeeid)
 	{
-		Query query = em.createQuery("SELECT DISTINCT p from Payee p " +
-				"LEFT JOIN FETCH p.addressid " +
-				"LEFT JOIN FETCH p.phoneid " +
-				"WHERE p.payeeid = :payeeid");
-		query.setParameter("payeeid", payeeid);
-		Payee payee = (Payee)query.getSingleResult();
-		
-		//Payee payee = em.find(Payee.class, payeeid);
+	  Payee payee = em.find(Payee.class, payeeid);
 		return payee;
 	}
 	
 //	UPDATE USER  ********************************************************************************	
 	
-	public String updateUser(int uid, String un, String pw1)
+	public String updateUser(int uid, String userName, String pw)
 	{
 		String message = "";
 		try
 		{
 			Person person = em.find(Person.class, uid);
-			if (!un.equals(null))
+			if (userName != null && !userName.isEmpty())
 			{
-				Query query = em.createQuery("SELECT DISTINCT p from Person p " +
-						"WHERE p.userid = :un");
-				query.setParameter("un", un);
-				ArrayList p = (ArrayList)query.getResultList();
-				if (p.isEmpty())
+				TypedQuery<Person> query = em.createQuery("SELECT p from Person p " +
+						                                      "WHERE p.username = :uname", Person.class);
+				query.setParameter("uname", userName);
+				Collection<Person> personsWithUserid = query.getResultList();
+				if (personsWithUserid.isEmpty())
 				{
-					person.setUserid(un);
-					person.setPassword(pw1);
-					em.merge(person);
+					person.setUsername(userName);
+					person.setPassword(pw);
 					message = "suc";
 				}
 				else
 				{
-					message = "**Username is already used.  Please try a different username.**";
+					message = "** Username is already taken.  Please try a different username. **";
 				}
 			}
 			else
 			{
-				person.setPassword(pw1);
-				em.merge(person);
+				person.setPassword(pw);
 				message = "suc";
 			}
-		}catch (Exception e){
-			System.out.println("Error");
+		} catch (Exception e) {
+		  e.printStackTrace();
 		}
 		return message;
 	}

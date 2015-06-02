@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import util.DateUtils;
 
 @Entity
-public class Checkorder implements Serializable {
+public class CheckOrder implements Serializable {
 	@Id
 	@GeneratedValue
 	private int orderid;
@@ -25,14 +25,19 @@ public class Checkorder implements Serializable {
 	@JoinColumn(name="accountid")
 	private Account accountid;
 
-	@ManyToOne
-	@JoinColumn(name="personid")
-	private Person personid;
-
 	private static final long serialVersionUID = 1L;
 
-	public Checkorder() {
-		super();
+	public CheckOrder()
+	{
+	  
+	}
+	
+	public CheckOrder(BigDecimal amount, String checkId, Account a)
+	{
+    this.amount = amount;
+    this.checkid = checkId;
+    this.accountid = a;
+    this.dateordered = DateUtils.Now("dd-MMM-yy");
 	}
 
 	public int getOrderid() {
@@ -74,20 +79,11 @@ public class Checkorder implements Serializable {
 	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
-
-	public Person getPersonid() {
-		return this.personid;
-	}
-
-	public void setPersonid(Person personid) {
-		this.personid = personid;
-	}
 	
-	public void placeOrder(BigDecimal amount, String checkId, Account a, Person p) {
+	public void placeOrder(BigDecimal amount, String checkId, Account a) {
 		this.amount = amount;
 		this.checkid = checkId;
 		this.accountid = a;
-		this.personid = p;
 		this.dateordered = DateUtils.Now("dd-MMM-yy");	
 	}
 }

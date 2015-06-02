@@ -2,11 +2,13 @@ package entityBeans;
 
 import java.io.Serializable;
 import java.util.Set;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Branch implements Serializable {
@@ -15,17 +17,15 @@ public class Branch implements Serializable {
 
 	private String branchname;
 
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name="addressid")
 	private Address addressid;
 
-	@OneToMany(mappedBy="branchid")
-	private Set<Person> personCollection;
-
 	private static final long serialVersionUID = 1L;
 
-	public Branch() {
-		super();
+	public Branch()
+	{
+		
 	}
 
 	public String getBranchid() {
@@ -51,13 +51,4 @@ public class Branch implements Serializable {
 	public void setAddressid(Address addressid) {
 		this.addressid = addressid;
 	}
-
-	public Set<Person> getPersonCollection() {
-		return this.personCollection;
-	}
-
-	public void setPersonCollection(Set<Person> personCollection) {
-		this.personCollection = personCollection;
-	}
-
 }

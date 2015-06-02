@@ -10,7 +10,7 @@ import javax.naming.InitialContext;
 import org.junit.Test;
 
 import entityBeans.Account;
-import entityBeans.Banktransaction;
+import entityBeans.BankTransaction;
 
 import sessionBeans.BusinessRulesBean;
 import sessionBeans.BusinessRulesRemote;
@@ -49,7 +49,7 @@ public class RemovePayeeTest {
 		
 		Context jndiContext;
 		BusinessRulesRemote businessRulesRemote = null;
-		List<Banktransaction> list1 = new ArrayList<Banktransaction>();
+		List<BankTransaction> list1 = new ArrayList<BankTransaction>();
 		int counter = -1;
 		int elem = -1;
 		
@@ -59,8 +59,8 @@ public class RemovePayeeTest {
 			businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 			
 			Account account = businessRulesRemote.getAccount(uid);
-			Set<Banktransaction> trans1 = account.getBanktransactionCollection();
-			Set<Banktransaction> trans2 = account.getBanktransactionCollection2();
+			Set<BankTransaction> trans1 = account.getTransactionsIn();
+			Set<BankTransaction> trans2 = account.getTransactionsOut();
 			
 			System.out.println("before Merge");
 			trans1.addAll(trans2);
@@ -70,10 +70,10 @@ public class RemovePayeeTest {
 			for(Iterator it = trans1.iterator(); it.hasNext();) {
 				
 				System.out.println("NEW BT");
-				Banktransaction bt = (Banktransaction)it.next();
+				BankTransaction bt = (BankTransaction)it.next();
 				
 				System.out.println(bt.getTransactionid());
-				Banktransaction bt2 = null;
+				BankTransaction bt2 = null;
 				
 				if (counter == -1){
 					System.out.println("list1 is null");
@@ -87,7 +87,7 @@ public class RemovePayeeTest {
 					int i = 0;
 					while (i == 0){
 						
-						bt2 = (Banktransaction)list1.get(counter);
+						bt2 = (BankTransaction)list1.get(counter);
 						System.out.println("This is bt2! " + bt2.getTransactionid());
 						if ((bt.getTransactionid() < bt2.getTransactionid()) && (counter == 0)){
 						
@@ -99,7 +99,7 @@ public class RemovePayeeTest {
 						
 						else if (bt.getTransactionid() < bt2.getTransactionid()) {
 							int c = counter - 1;
-							Banktransaction bt3 = (Banktransaction)list1.get(c);
+							BankTransaction bt3 = (BankTransaction)list1.get(c);
 							
 							if (bt.getTransactionid() < bt3.getTransactionid()){	
 								counter--;
@@ -123,7 +123,7 @@ public class RemovePayeeTest {
 						
 						else if (bt.getTransactionid() >= bt2.getTransactionid()){
 							int c = counter + 1;
-							Banktransaction bt3 = (Banktransaction)list1.get(c);
+							BankTransaction bt3 = (BankTransaction)list1.get(c);
 							if (bt.getTransactionid() >= bt3.getTransactionid()){
 								counter++;
 							}
@@ -143,7 +143,7 @@ public class RemovePayeeTest {
 			Iterator it = list1.iterator(); 
 			for(int c = 0; c < 15; c++) {
 				 
-				Banktransaction bt = (Banktransaction)it.next();
+				BankTransaction bt = (BankTransaction)it.next();
 				System.out.println(bt.getTransactionid());
 				
 				
@@ -175,10 +175,10 @@ public class RemovePayeeTest {
 			businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 			Account a = businessRulesRemote.getAccount(2);
 			
-			List<Banktransaction> list = businessRulesRemote.getTransactions(a);
+			List<BankTransaction> list = businessRulesRemote.getTransactions(a);
 			
 			for (Iterator it = list.iterator(); it.hasNext();){
-				Banktransaction bt = (Banktransaction)it.next();
+				BankTransaction bt = (BankTransaction)it.next();
 				System.out.println(bt.getTransactionid());
 			}
 			

@@ -23,11 +23,11 @@ public class LoadBillPayBCO implements BCOInterface{
 		TinySession aSession = (TinySession) req.getAttribute("session"); 				
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());
 		
-		List<Payee> list1 = new ArrayList();
+//		List<Payee> list1 = new ArrayList<>();
 		req.setAttribute("success", "");
 		req.setAttribute("error", "");
 		req.setAttribute("payid", "");
-		req.setAttribute("errlist1", list1);
+//		req.setAttribute("errlist1", list1);
 
 		Person person = null;
 		Context jndiContext;
@@ -36,10 +36,11 @@ public class LoadBillPayBCO implements BCOInterface{
 		{			
 			jndiContext = new InitialContext();			
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);			
-			person = businessRulesRemote.getPersonPayee(uid);
-
-		}catch(Exception e){
-			
+			person = businessRulesRemote.getPerson(uid);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
 		}		
 		return person;
 	}

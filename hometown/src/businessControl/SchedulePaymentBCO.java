@@ -53,7 +53,7 @@ public class SchedulePaymentBCO implements BCOInterface {
 				businessRulesRemote.schedulePayment(uid, from, payeeid, amount, date);
 				req.setAttribute("error", "suc");
 			}
-			person = businessRulesRemote.getPersonPayee(uid);
+			person = businessRulesRemote.getPerson(uid);
 			
 		}catch(Exception e){
 			req.setAttribute("error", "jndierror");

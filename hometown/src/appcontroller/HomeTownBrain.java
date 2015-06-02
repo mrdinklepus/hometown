@@ -35,7 +35,8 @@ public class HomeTownBrain
 				if (aSession == null)
 				{
 					aSession = new TinySession(sessionID);
-				}					
+				}
+				
 				aSession.setSessionID(sessionID);
 				Cookie newCookie = new Cookie("1234", sessionID);
 				newCookie.setMaxAge(-1);
@@ -43,8 +44,9 @@ public class HomeTownBrain
 				tsm.addSession(sessionID, aSession);
 				req.setAttribute("session", aSession);
 				System.out.println("Session Saved");
-			}			
-			req.setAttribute("reqObject", obj);				
+			}
+			
+			req.setAttribute("reqObject", obj);
 			VCOInterface vcoObj = (VCOInterface)Class.forName(vcoName).newInstance();
 			vcoObj.doDisplay(req, resp);
 			

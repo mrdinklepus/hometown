@@ -1,15 +1,12 @@
 package entityBeans;
 
 import java.io.Serializable;
-import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 
 @Entity
 public class Phone implements Serializable {
@@ -17,23 +14,22 @@ public class Phone implements Serializable {
 	@GeneratedValue
 	private int phoneid;
 
-	private String phone;
+	private String phonenumber;
 
-	private String phonetype;
-
-	@OneToMany(mappedBy="phoneid")
-	private Set<Payee> payeeCollection;
-
-	@ManyToMany
-	@JoinTable(name="personphone",
-		joinColumns=@JoinColumn(name="phoneid"),
-		inverseJoinColumns=@JoinColumn(name="personid"))
-	private Set<Person> personCollection;
+	@Enumerated(EnumType.STRING)
+	private PhoneType phonetype;
 
 	private static final long serialVersionUID = 1L;
 
-	public Phone() {
-		super();
+	public Phone()
+	{
+	  
+	}
+	
+	public Phone(String phone, PhoneType type)
+	{
+    this.phonetype = type;
+    this.phonenumber = phone;
 	}
 
 	public int getPhoneid() {
@@ -44,40 +40,19 @@ public class Phone implements Serializable {
 		this.phoneid = phoneid;
 	}
 
-	public String getPhone() {
-		return this.phone;
+	public String getPhoneNumber() {
+		return this.phonenumber;
 	}
 
-	public void setPhone(String phone) {
-		this.phone = phone;
+	public void setPhoneNumber(String phone) {
+		this.phonenumber = phone;
 	}
 
-	public String getPhonetype() {
+	public PhoneType getPhonetype() {
 		return this.phonetype;
 	}
 
-	public void setPhonetype(String phonetype) {
+	public void setPhonetype(PhoneType phonetype) {
 		this.phonetype = phonetype;
-	}
-
-	public Set<Payee> getPayeeCollection() {
-		return this.payeeCollection;
-	}
-
-	public void setPayeeCollection(Set<Payee> payeeCollection) {
-		this.payeeCollection = payeeCollection;
-	}
-
-	public Set<Person> getPersonCollection() {
-		return this.personCollection;
-	}
-
-	public void setPersonCollection(Set<Person> personCollection) {
-		this.personCollection = personCollection;
-	}
-	
-	public void createPhone(String phone){
-		this.phonetype = "H";
-		this.phone = phone;
 	}
 }

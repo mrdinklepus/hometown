@@ -21,11 +21,11 @@ public class LoadSchedulePaymentVCO implements VCOInterface {
 		Comparator dcomp = new DateComparator();
 		Person person = (Person)req.getAttribute("reqObject");
 		List list1 = new LinkedList();
-		list1.addAll(person.getAccountCollection());
+		list1.addAll(person.getAccounts());
 		Collections.sort(list1, acomp);
 		
 		List list2 = new LinkedList();
-		list2.addAll(person.getPaymentCollection());
+		list2.addAll(person.getScheduledPayments());
 		Collections.sort(list2, dcomp);
 
 		req.setAttribute("alist", list1);

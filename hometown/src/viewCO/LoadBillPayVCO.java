@@ -20,7 +20,7 @@ public class LoadBillPayVCO implements VCOInterface {
 		Comparator acomp = new AccountComparator();
 		Person person = (Person)req.getAttribute("reqObject");
 		List list1 = new LinkedList();
-		list1.addAll(person.getAccountCollection());
+		list1.addAll(person.getAccounts());
 		Collections.sort(list1, acomp);
 
 		req.setAttribute("alist", list1);
