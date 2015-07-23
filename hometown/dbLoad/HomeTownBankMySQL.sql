@@ -462,6 +462,15 @@ INSERT INTO hometownbank.account(accountno, balance, accounttype)
    VALUES('2', 10000000.00, 'Y');
 INSERT INTO hometownbank.account(accountno, balance, accounttype)
    VALUES('3', 90000000.00, 'R');
+   
+INSERT INTO hometownbank.personaccount
+   VALUES(1, 1);
+INSERT INTO hometownbank.personaccount
+   VALUES(1, 2);
+INSERT INTO hometownbank.personaccount
+   VALUES(1, 3);
+INSERT INTO hometownbank.personaccount
+   VALUES(1, 4);
 
 -- Insert payees
 INSERT INTO hometownbank.payee(company, addressid)
