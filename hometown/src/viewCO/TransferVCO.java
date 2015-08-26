@@ -9,47 +9,40 @@ import javax.servlet.http.HttpServletResponse;
 import entityBeans.Person;
 import entityBeans.Account;
 
-public class TransferVCO implements VCOInterface {
-
-	public void doDisplay(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException 
+public class TransferVCO implements VCOInterface
+{
+	public void doDisplay(HttpServletRequest req, HttpServletResponse resp) throws IOException 
 	{	
-		if (!req.getAttribute("error").toString().equals("jndierror"))
-		{		
-			if (req.getParameter("cmd").toString().equals("confirmTransfer") && req.getAttribute("validate").toString().equals("true"))
+		if (req.getAttribute("error") != null && req.getAttribute("error").toString().equals("jndierror"))
+		{
+		  try
+      {
+        req.getRequestDispatcher("WEB-INF/generalErrorPage.jsp").forward(req, resp);
+      } catch (ServletException e) {
+        e.printStackTrace();
+      }
+		}
+		else if (req.getParameter("cmd") != null && req.getParameter("cmd").toString().equals("confirmTransfer")
+		            && req.getAttribute("error") == null)
+		{
+			try 
 			{
-				try 
-				{
-					req.getRequestDispatcher("WEB-INF/confirmTransfer.jsp").forward(req, resp);
-				
-				} catch (ServletException e) {
-					e.printStackTrace();
-				}
+				req.getRequestDispatcher("WEB-INF/confirmTransfer.jsp").forward(req, resp);
+			} catch (ServletException e) {
+				e.printStackTrace();
 			}
-			else
-			{		
-				System.out.println("in else");
-				Comparator acomp = new AccountComparator();
-				Person person = (Person)req.getAttribute("reqObject");
-				List list1 = new LinkedList();
-				list1.addAll(person.getAccounts());
-				Collections.sort(list1, acomp);
-					
-				req.setAttribute("alist", list1);
-				
-				try 
-				{
-					req.getRequestDispatcher("WEB-INF/transfer.jsp").forward(req, resp);
-				
-				} catch (ServletException e) {
-					e.printStackTrace();
-				}
-			}			
 		}
 		else
 		{
-			try {
-				req.getRequestDispatcher("WEB-INF/networkErrorPage.jsp").forward(req, resp);
+			Person person = (Person)req.getAttribute("reqObject");
+			List<Account> list = new ArrayList<>(person.getAccounts());
+			Collections.sort(list, new AccountComparator());
+			
+			req.setAttribute("accountCollection", list);
+			
+			try 
+			{
+				req.getRequestDispatcher("WEB-INF/transfer.jsp").forward(req, resp);
 			} catch (ServletException e) {
 				e.printStackTrace();
 			}

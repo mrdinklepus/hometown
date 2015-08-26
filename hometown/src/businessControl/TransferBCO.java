@@ -20,8 +20,6 @@ public class TransferBCO implements BCOInterface{
 	
 	public Object doSomething(HttpServletRequest req, HttpServletResponse resp) 
 	{
-		
-		req.setAttribute("error", "");
 		req.setAttribute("validate", "");
 		req.setAttribute("to", "");
 		req.setAttribute("from", "");
@@ -33,26 +31,20 @@ public class TransferBCO implements BCOInterface{
 		int from = Integer.parseInt(req.getParameter("from"));
 		String desc = req.getParameter("tDescription").toString();
 		Person person = null;
-		Context jndiContext;
 		
 		BigDecimal amount = new BigDecimal(req.getParameter("amt"));
 			
 		try
 		{	
-			jndiContext = new InitialContext();			
-			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);														
-			businessRulesRemote.transfer(to, from, amount, desc);
-			System.out.println("Transfer Successful");
-			req.setAttribute("error", "suc");			
-			person = businessRulesRemote.getPerson(uid);							
-
-		}catch(EJBException e){
-			e.printStackTrace();
-			req.setAttribute("error", "jndierror");
+		  Context jndiContext = new InitialContext();			
+			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 			
-		}catch(Exception ex){
+			businessRulesRemote.transfer(to, from, amount, desc);
+			person = businessRulesRemote.getPerson(uid);
+			req.setAttribute("success", "Thank You.  Your Transfer has been made.  You may make another transfer.");
+		} catch (Exception ex) {
 			ex.printStackTrace();
-			req.setAttribute("error", "jndierror");
+			return "jndierror";
 		}
 		return person;				
 	}

@@ -18,20 +18,19 @@ public class RemovePayeeBCO implements BCOInterface {
 		TinySession aSession = (TinySession) req.getAttribute("session"); 				
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());
 				
-		int payeeid = Integer.parseInt(req.getParameter("payeeid"));	
-		req.setAttribute("error", "");
-		
+		int payeeid = Integer.parseInt(req.getParameter("payeeid"));
 		Person person = null;
-		Context jndiContext;
 		
 		try
 		{			
-			jndiContext = new InitialContext();
+			Context jndiContext = new InitialContext();
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);			
 			person = businessRulesRemote.removePayee(uid, payeeid);
-			
-		}catch(Exception e){
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
+			return "jndierror";
 		}
 		return person;		
 	}	

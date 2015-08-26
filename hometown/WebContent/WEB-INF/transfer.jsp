@@ -1,43 +1,45 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
-<%@page import="entityBeans.Person, entityBeans.Personpayee, entityBeans.Account, entityBeans.Payee"%>
+<%@page import="entityBeans.Person, entityBeans.Account"%>
 <%@page import="java.util.Iterator"%>
 <%@page import="java.math.BigDecimal" %>
 <%@page import="java.util.List"%>
-<%@page import="java.util.LinkedList"%>
-<%Person person = (Person)request.getAttribute("reqObject"); %>
-<%List list1 = (LinkedList)request.getAttribute("alist"); 
-  String toac = request.getAttribute("to").toString();
-  String fromac = request.getAttribute("from").toString();
-  String amnt = request.getAttribute("amt").toString();
+<%@page import="java.util.Collection"%>
+<% 
+  Person person = (Person)request.getAttribute("reqObject");
+  Collection<Account> accountList = (Collection)request.getAttribute("accountCollection");
+  String fromAccountId = request.getAttribute("from") != null ? request.getAttribute("from").toString() : "";
+  String toAccountId = request.getAttribute("to") != null ? request.getAttribute("to").toString() : "";
+  String amt = request.getAttribute("amt") != null ? request.getAttribute("amt").toString() : "";
 %>
 <%@ include file="navigation.html" %>
-<div id="waiting">
-	<p><b>Loading...</b></p><br/>
-	<img src="images/Progressbar.gif">
-</div>
-<div id="emess">
-<%	String err = request.getAttribute("error").toString();
-	if (err.equals("suc")){ 
+<div id="displayMsg">
+<%  
+  Object err = request.getAttribute("error");
+  Object suc = request.getAttribute("success");
+  if (suc != null)
+  { 
 %>
-<div class="transferSuccessful">
-	<p>Thank You.  Your Transfer has been made.  You may make another transfer.</p>
-	<input type="button" value="Back to Transfer" onclick="showTransfer();" />
-</div>
-<%}	else{
-	if (err.startsWith("*")){ 
+	<div class="success">
+	  <p><%=suc.toString()%></p>
+	  <input type="button" value="Back to Transfer" onclick="showTransfer();" />
+	</div>
+<%
+  }
+  else
+  {
+    if (err != null)
+    {
 %>
-<div class="transferSuccessful">
-	<p>&nbsp;<%=err%></p>
+	<div class="error">
+	  <p><%=err.toString()%></p>
+	</div>
+  <%}%>
 </div>
-<%}%>
-</div>
-<div id="header"> 
-	<ul>
-		<li class="large">Transfer Funds</li>
-		<li class="small">Select accounts and enter an amount to transfer</li>
-	</ul>	
-</div>
+<header> 
+	<h3>Transfer Funds</h3>
+  <p>Select accounts and enter an amount to transfer</p>
+</header>
 	
 <div id="transFunds">
 	<div class="titlebar">
@@ -48,35 +50,37 @@
 		</ul>
 	</div>
 
-<form action="javascript:postForm()">	
-	<div class="accounts">
-		<ul>
-			<li><select name="from">
-			<%for(Iterator it = list1.iterator(); it.hasNext();) {
-				Account aAccount = (Account)it.next();
-				String temp = aAccount.getAccountid() + "~~fromAccount=" + aAccount.getAccountno();
-			%>
-			<option value="<%=temp%>" <%if(fromac.equals(Integer.toString(aAccount.getAccountid()))){%>SELECTED<%} %>><%=aAccount.getType()%><%=aAccount.getAccountno()%> &nbsp;($<%=aAccount.getBalance()%> )</option>			
-			<%} %>
-			</select></li>
-			
-			<li><select name="to">
-			<%for(Iterator it = list1.iterator(); it.hasNext();) {
-				Account aAccount = (Account)it.next();
-				String temp = aAccount.getAccountid() + "~~toAccount=" + aAccount.getAccountno();
-			%>
-			<option value="<%=temp%>" <%if(toac.equals(Integer.toString(aAccount.getAccountid()))){%>SELECTED<%} %>><%=aAccount.getType()%><%=aAccount.getAccountno()%> &nbsp;($<%=aAccount.getBalance()%> )</option>
-			<%} %>
-			</select></li>
-			
-			<li>$ <input id="foc" name="amt" type="text" <%if(!amnt.equals("")){%>value="<%=amnt%>"<%} %>/></li>
+	<form action="javascript:postForm()">	
+		<div class="accounts">
+			<ul>
+				<li>
+				  <select name="from">
+	        <%for (Iterator<Account> it = accountList.iterator(); it.hasNext();)
+	          {
+					    Account aAccount = it.next();
+					    String temp = aAccount.getAccountid() + "~~fromAccount=" + aAccount.getAccountNo();%>
+				    <option value="<%=temp%>" <%if (fromAccountId.equals(Integer.toString(aAccount.getAccountid()))) {%>SELECTED<%} %>><%=aAccount.getAccountType()%><%=aAccount.getAccountNo()%> &nbsp;($<%=aAccount.getBalance()%> )</option>			
+	        <%}%>
+				  </select>
+				</li>
+				<li>
+				  <select name="to">
+				  <%for (Iterator<Account> it = accountList.iterator(); it.hasNext();)
+				    {
+					    Account aAccount = it.next();
+					    String temp = aAccount.getAccountid() + "~~toAccount=" + aAccount.getAccountNo();%>
+				    <option value="<%=temp%>" <%if (toAccountId.equals(Integer.toString(aAccount.getAccountid()))) {%>SELECTED<%} %>><%=aAccount.getAccountType()%><%=aAccount.getAccountNo()%> &nbsp;($<%=aAccount.getBalance()%> )</option>
+				  <%}%>
+				  </select>
+				</li>
+				<li>$ <input id="foc" name="amt" type="number" step="0.01" required <%if(!amt.equals("")) {%>value="<%=amt%>"<%}%>/></li>
+			</ul>
 			<input name="cmd" type="hidden" value="confirmTransfer"/>
-		</ul>	
-	</div>
-<br />
-	<div class="submit" style="padding-top:5px;">
-		<input type="submit" value="Make Transfer"/>
-	</div>
-</form>	
+		</div>
+	  <br />
+		<div class="submit">
+			<input type="submit" value="Make Transfer"/>
+		</div>
+	</form>	
 </div>
 <%}%>

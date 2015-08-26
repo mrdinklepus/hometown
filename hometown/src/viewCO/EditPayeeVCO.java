@@ -16,12 +16,9 @@ public class EditPayeeVCO implements VCOInterface {
 	public void doDisplay(HttpServletRequest req, HttpServletResponse resp)
 	throws IOException 
 	{
-		System.out.println("in LoadEditPayeeVCO");
 		Payee p = (Payee)req.getAttribute("reqObject");
-		Address add = p.getAddress();
 		Set<Phone> ph = p.getPhones();
-		req.setAttribute("address", add);
-		req.setAttribute("phone", ph);
+		req.setAttribute("phone", ph.iterator().next());
 		
 		try 
 		{

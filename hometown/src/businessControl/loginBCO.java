@@ -17,20 +17,20 @@ public class loginBCO implements BCOInterface
 {
   public Object doSomething(HttpServletRequest req, HttpServletResponse resp)
   {
-    String username = req.getParameter("uname");
-    String password = req.getParameter("pass");
+    String username = req.getParameter("unametf");
+    String password = req.getParameter("passtf");
     
     Person person = null;
     
     try
     {
-      BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)InitialContext
-          .doLookup(BusinessRulesBean.RemoteJNDIName);
+      BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)InitialContext.doLookup(BusinessRulesBean.RemoteJNDIName);
       person = businessRulesRemote.login(username, password);
     }
     catch (Exception e)
     {
       e.printStackTrace();
+      return "jndierror";
     }
     return person;
   }

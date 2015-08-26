@@ -20,22 +20,21 @@ public class RemovePaymentBCO implements BCOInterface {
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());
 		int paymentid = Integer.parseInt(req.getParameter("paymentid"));
 		
-		req.setAttribute("error", "");
 		Person person = null;
-		Context jndiContext;
 		
 		try
 		{			
-			jndiContext = new InitialContext();
+		  Context jndiContext = new InitialContext();
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);		
-			String pname = businessRulesRemote.removePayment(uid, paymentid );
+			String pname = businessRulesRemote.removePayment(uid, paymentid);
 			
-			req.setAttribute("error", "remsuc");
-			req.setAttribute("remsuc", pname);			
+			req.setAttribute("success", "Thank You.  Your payment to " + pname + " has been removed.");			
 			person = businessRulesRemote.getPerson(uid);
-			
-		}catch(Exception e){
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
+			return "jndierror";
 		}
 		return person;		
 	}

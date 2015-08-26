@@ -29,7 +29,6 @@ public class LoadDefaultVCO implements VCOInterface {
 		try 
 		{
 			req.getRequestDispatcher("login.html").forward(req, resp);
-		
 		} catch (ServletException e) {
 			e.printStackTrace();
 		}	

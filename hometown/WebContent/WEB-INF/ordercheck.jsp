@@ -1,35 +1,29 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
-<%@page import="entityBeans.Person, entityBeans.Personpayee, entityBeans.Account, entityBeans.Payee"%>
+<%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@page import="entityBeans.Person, entityBeans.AccountType, entityBeans.Account"%>
 <%@page import="java.util.Iterator"%>
-<%@page import="java.util.List"%>
-<%@page import="java.util.LinkedList"%>
-<%@page import="entityBeans.Payments"%>
+<%@page import="java.util.Collection"%>
 
 <%Person person = (Person)request.getAttribute("reqObject"); %>
-<%List list1 = (LinkedList)request.getAttribute("alist"); %>
+<%Collection<Account> accountList = (Collection)request.getAttribute("alist"); %>
 
 <%@include file="navigation.html" %>
-<div id="waiting">
-	<p><b>Loading...</b></p><br/>
-	<img src="images/Progressbar.gif">
-</div>
-<div id="header">
-	<ul>
-		<li class="large">Order Checks</li>
-		<li class="small">Select Check Design (Checks come in packs of 100)</li>
-	</ul>
-</div>
+<header> 
+  <h3>Order Checks</h3>
+  <p>Select Check Design (Checks come in packs of 100)</p>
+</header>
 
-<div id="emess">
-<%	String cd = request.getAttribute("success").toString();
-	if (cd.equals("yes")){ 
+<div id="displayMsg">
+<%
+	if (request.getAttribute("success") != null)
+	{
 %>
-<div class="transferSuccessful">
-	<p>&nbsp;Thank You for using Home town Webbank.  Your checks have been ordered!</p>
-	<input type="button" value="Back to Checks" onclick="showOrderCheck();" />
-</div>
-<%}else{%>
+	<div class="success">
+		<p><%=request.getAttribute("success")%></p>
+		<input type="button" value="Back to Checks" onclick="showOrderCheck();" />
+	</div>
+<%}
+	else
+	{%>
 </div>
 <div id="checkOrd">
 <form>
@@ -71,12 +65,14 @@
 	<div id="selectAccount">
 		<div>Select Account for Checks 
 			<select name="aid">
-			<% for (Iterator b = list1.iterator(); b.hasNext();){ 
+			<%for (Iterator<Account> b = accountList.iterator(); b.hasNext();)
+			  {
 					Account aAccount = (Account)b.next();
-				if (aAccount.getAccounttype().equals("C") || aAccount.getAccounttype().equals("S") || aAccount.getAccounttype().equals("R")){ 
+					if (aAccount.getAccountType() != AccountType.SECURITY)
+					{
 			%>						
-				<option value="<%=aAccount.getAccountid()%>"><%=aAccount.getType()%><%=aAccount.getAccountno()%> &nbsp;($<%=aAccount.getBalance()%> )</option>
-			<%}} %>
+				<option value="<%=aAccount.getAccountid()%>"><%=aAccount.getAccountType()%><%=aAccount.getAccountNo()%> &nbsp;($<%=aAccount.getBalance()%> )</option>
+			<%} } %>
 			</select>
 		</div>
 		<br/>

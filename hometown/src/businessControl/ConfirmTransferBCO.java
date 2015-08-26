@@ -46,53 +46,42 @@ public class ConfirmTransferBCO implements BCOInterface
 					if (amount.compareTo(z) > 0)
 					{
 						Account fr = businessRulesRemote.getAccount(from);
+						Account toAcc = businessRulesRemote.getAccount(to);
 						BigDecimal balance = fr.getBalance();	
 						
 						if (balance.compareTo(amount) > 0 || fr.getAccountType().equals("R"))
 						{
 							String toNum = req.getParameter("toAccount").toString();
 							String fromNum = req.getParameter("fromAccount").toString();
-							req.setAttribute("validate", "true");
-							req.setAttribute("error", "suc");							
+							req.setAttribute("toType", toAcc.getAccountType().name());
+							req.setAttribute("fromType", fr.getAccountType().name());
 							req.setAttribute("toNum", toNum);
 							req.setAttribute("fromNum", fromNum);
 						}
 						else
 						{
-							System.out.println("Insufficient Funds");
-							req.setAttribute("validate", "false");
 							req.setAttribute("error", "**Unable to make transfer.  Insufficient funds to complete transaction.**");
 						}				
 					}
 					else
 					{
-						System.out.println("Amount entered was zero.");
-						req.setAttribute("validate", "false");
 						req.setAttribute("error", "**Unable to make transfer.  Please enter an amount greater than zero.**");
 					}
 				}
 				else
 				{
-					System.out.println("Transfer to same account.");
-					req.setAttribute("validate", "false");
 					req.setAttribute("error", "**Unable to make transfer.  Cannot make a transfer to the same account.**");
 				}				
-				person = businessRulesRemote.getPerson(uid);							
-	
-			}catch(EJBException e){
-				e.printStackTrace();
-				//req.setAttribute("error", "jndierror");
-				
-			}catch(Exception ex){
+				person = businessRulesRemote.getPerson(uid);
+			}
+			catch (Exception ex)
+			{
 				ex.printStackTrace();
-				//req.setAttribute("error", "jndierror");
+				return "jndierror";
 			}
 		}
 		else
 		{
-			System.out.println("Invalid Number");
-			req.setAttribute("validate", "false");
-			req.setAttribute("amt", "");
 			req.setAttribute("error", "**Unable to make transfer.  Please enter a valid amount.**");
 			
 			try
@@ -100,17 +89,18 @@ public class ConfirmTransferBCO implements BCOInterface
 				jndiContext = new InitialContext();			
 				BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 				person = businessRulesRemote.getPerson(uid);
-			
-			}catch (Exception ee){
+			}
+			catch (Exception ee)
+			{
 				ee.printStackTrace();
-				req.setAttribute("error", "jndierror");
+				return "jndierror";
 			}
 		}		
 		return person;				
 	}
 	
 	public boolean isParsableToBig(String i)
-		{
+	{
 		try
 		{
 			BigDecimal a = new BigDecimal(i);

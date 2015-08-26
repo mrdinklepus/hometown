@@ -16,77 +16,69 @@ import entityBeans.Person;
 import entityBeans.PayeeAccount;
 import entityBeans.PhoneType;
 
-public class EditPayeeBCO implements BCOInterface{
-
+public class EditPayeeBCO implements BCOInterface
+{
 	public Object doSomething(HttpServletRequest req, HttpServletResponse resp) 
 	{
-		System.out.println("In EditPayee BCO");
 		TinySession aSession = (TinySession) req.getAttribute("session"); 				
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());
-		
 		int payeeid = Integer.parseInt(req.getParameter("payeeid"));
-//		int addid = Integer.parseInt(req.getParameter("addressid"));
-		PhoneType phoneid = PhoneType.valueOf(req.getParameter("phoneid"));
-		int ppid = Integer.parseInt(req.getParameter("ppid"));
+		
+//		PhoneType phoneType = null;
+//		String phoneTypeString = req.getParameter("phonetype");
+//		if (phoneTypeString != null)
+//		{
+//		  phoneType = PhoneType.valueOf(phoneTypeString);
+//		}
+		
 		String coname = req.getParameter("coname");
 		String street = req.getParameter("street");
 		String city = req.getParameter("city");
 		String state = req.getParameter("state");
 		String zip = req.getParameter("zip");
 		String phone = req.getParameter("phone");
+		String origaccnum = req.getParameter("origaccnum");
 		String accnum = req.getParameter("accnum");
-		req.setAttribute("error", "");
 		
-		String isvalid = validate(coname, street, city, state, zip, phone, accnum);
-		
-		System.out.println("Payee name is " + coname + " '" + phone + "'");
-		System.out.println("Street address is " + street);
-		System.out.println("City is " + city);
-		
-		Person person = null;
 		Payee payee = null;
-		
-		Context jndiContext;
 				
 		try
 		{			
-			jndiContext = new InitialContext();			
+		  Context jndiContext = new InitialContext();			
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 			
-			if (isvalid.compareTo("isValid") != 0)
+			String isvalid = validate(coname, street, city, state, zip, phone, accnum);
+			if (isvalid != null)
 			{
 				req.setAttribute("error", isvalid);
 			}
 			else
-			{					
-				businessRulesRemote.updatePayee(payeeid, phoneid, ppid, coname, 
-								                street, city, state.toUpperCase(), zip, phone, accnum);
-				req.setAttribute("error", "suc");
+			{
+			  payee = businessRulesRemote.updatePayee(payeeid, uid, PhoneType.MAIN, origaccnum, coname, 
+								                        street, city, state.toUpperCase(), zip, phone, accnum);
+				req.setAttribute("success", "Information for " + coname + " has been successfully updated.");
 			}
-				
-			payee = businessRulesRemote.getpayeebyid(payeeid);
-			Person per = businessRulesRemote.getPerson(uid);
 			
+			Person per = businessRulesRemote.getPerson(uid);
 			Set<PayeeAccount> spp = per.getPayeeAccounts();
 			
-			PayeeAccount pp = null;
+			PayeeAccount pa = null;
 			
-			for (Iterator iterator = spp.iterator(); iterator.hasNext();)
+			for (Iterator<PayeeAccount> it = spp.iterator(); it.hasNext();)
 			{
-				PayeeAccount tpp = (PayeeAccount)iterator.next();
+				PayeeAccount tpp = it.next();
 				if (payee.getPayeeid() == (tpp.getPayeeAccountKey().getPayeeid().getPayeeid()))
 				{
-					pp = tpp;
-					System.out.println("Personpayee found!");
+					pa = tpp;
+					break;
 				}
 			}
-			req.setAttribute("pp", pp);
-						
-			System.out.println("Got Payee");
-			System.out.println("account number is " + pp.getPayeeAccountKey().getPayeeAccountNo());
-
-		} catch (Exception e) {
+			req.setAttribute("payeeAccount", pa);
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
+			return "jndierror";
 		}
 		return payee;		
 	}
@@ -95,20 +87,18 @@ public class EditPayeeBCO implements BCOInterface{
 	{
 		String test = null;
 		
-		if (p == "" || p.length() == 10)
+		if (p.isEmpty() || p.length() == 10)
 		{
 			if (co != "" && str != "" && ci != "" && st != "" && z != "" && an != "")
 			{
 				boolean testzip = isParsableToDouble(z);
 				boolean testphone = isParsableToDouble(p);
-				if (testzip == true && testphone == true)
+				if (!testzip && !testphone)
 				{
-					test = "isValid";
-				}else{
 					System.out.println("Invalid zip or phone number");
 					test = "**Unable to update Payee.  Invalid zip code or phone number.**";
 				}				
-			}else{
+			} else {
 				System.out.println("Field was blank");
 				test = "**Unable to update Payee.  Missing required information.**";
 			}		
@@ -125,13 +115,14 @@ public class EditPayeeBCO implements BCOInterface{
 	{
 		try
 		{
-			if (i.compareTo("") != 0)
+			if (!i.isEmpty())
 			{
-				double a = Double.valueOf(i);
+				Double.valueOf(i);
 			}
 			return true;
-		
-		}catch(NumberFormatException nfe){
+		}
+		catch (NumberFormatException nfe)
+		{
 			System.out.println("Invalid number");
 			return false;
 		}

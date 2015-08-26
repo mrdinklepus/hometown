@@ -11,6 +11,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -23,7 +24,7 @@ import util.DateUtils;
 @Entity
 public class BankTransaction implements Comparable<BankTransaction>, Serializable {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int transactionid;
 
 	private String description;
@@ -75,7 +76,7 @@ public class BankTransaction implements Comparable<BankTransaction>, Serializabl
 		this.frombalance = fromAccount.getBalance();
 		this.tobalance = toAccount.getBalance();
 		this.transtype = transType;
-		this.timemade = DateUtils.Now("dd-MMM-yy");	
+		this.timemade = DateUtils.Now("yyyy-MM-dd");
 	}
 	
 	public BankTransaction(Account toAccount, Account fromAccount, 
@@ -89,7 +90,7 @@ public class BankTransaction implements Comparable<BankTransaction>, Serializabl
 		this.transtype = transType;
 		this.description = description;
 		this.userdescription = userdescription;
-		this.timemade = DateUtils.Now("dd-MMM-yy");			
+		this.timemade = DateUtils.Now("yyyy-MM-dd");
 	}
 	
 	public BankTransaction(Account fromAccount, BigDecimal amount, TransactionType transType,
@@ -101,7 +102,7 @@ public class BankTransaction implements Comparable<BankTransaction>, Serializabl
 		this.transtype = transType;
 		this.description = description;
 		this.userdescription = userDescription;
-		this.timemade = DateUtils.Now("dd-MMM-yy");		
+		this.timemade = DateUtils.Now("yyyy-MM-dd");
 	}
 	
 	public int getTransactionid() {
@@ -144,19 +145,19 @@ public class BankTransaction implements Comparable<BankTransaction>, Serializabl
 		this.timemade = timemade;
 	}
 
-	public Account getToaccountid() {
+	public Account getToAccount() {
 		return this.toaccountid;
 	}
 
-	public void setToaccountid(Account toaccountid) {
+	public void setToAccount(Account toaccountid) {
 		this.toaccountid = toaccountid;
 	}
 
-	public Account getFromaccountid() {
+	public Account getFromAccount() {
 		return this.fromaccountid;
 	}
 
-	public void setFromaccountid(Account fromaccountid) {
+	public void setFromAccount(Account fromaccountid) {
 		this.fromaccountid = fromaccountid;
 	}
 

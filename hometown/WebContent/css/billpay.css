@@ -69,17 +69,9 @@
 	position:relative;
 	width:100%;
 	min-height:130px;
-	height:auto;	
-	/*overflow: auto;*/
-}
-
-#billpay .addnew
-{
-	position:relative;
-	width:100%;
-	min-height:125px;
 	height:auto;
-	margin-top:10px;
+	margin-bottom:10px;
+	/*overflow: auto;*/
 }
 
 #billpay .edit, #billpay .remove

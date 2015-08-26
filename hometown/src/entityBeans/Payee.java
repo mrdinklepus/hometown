@@ -7,6 +7,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -19,13 +20,13 @@ import javax.persistence.PrimaryKeyJoinColumn;
 @Entity
 public class Payee implements Serializable {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int payeeid;
 
 	private String company;
 
 	@OneToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
-	@PrimaryKeyJoinColumn
+	@JoinColumn(name="addressid")
 	private Address addressid;
 	
 	@OneToMany(fetch=FetchType.EAGER, orphanRemoval=true, cascade=CascadeType.ALL)
@@ -34,10 +35,10 @@ public class Payee implements Serializable {
     inverseJoinColumns=@JoinColumn(name="phoneid"))
   private Set<Phone> phoneid;
 
-//	@OneToMany(mappedBy="payeeid", fetch=FetchType.EAGER)
-//	private Set<PersonPayeeAccount> payeeAccounts;
+//	@OneToMany(mappedBy="payeeaccount")
+//	private Set<PayeeAccountKey> payeeaccountkey;
 	
-//	@OneToMany(mappedBy="payeeid", fetch=FetchType.EAGER)
+//	@OneToMany(mappedBy="payeeid", orphanRemoval=true, cascade=CascadeType.REMOVE)
 //	private Set<Payments> paymentCollection;
 	
 //	@ManyToMany(mappedBy="payeeCollection", fetch=FetchType.EAGER)
@@ -45,7 +46,8 @@ public class Payee implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public Payee() {
+	public Payee()
+	{
 	  
 	}
 	
@@ -102,22 +104,10 @@ public class Payee implements Serializable {
 //	public void setBanktransactionCollection(Set<BankTransaction> banktransactionCollection) {
 //		this.banktransactionCollection = banktransactionCollection;
 //	}
-	
-	public void addPayee(String coname, Address add, Set<Phone> phoneNumbers){
-		this.company = coname;
-		this.addressid = add;
-		this.phoneid = phoneNumbers;
-		
-	}
-	
-	public void addPayee(String coname, Address addid) {
-		this.company = coname;
-		this.addressid = addid;
-	}
 
-	/**
-	 * @return the paymentCollection
-	 */
+//	/**
+//	 * @return the paymentCollection
+//	 */
 //	public Set<Payments> getPaymentCollection() {
 //		return paymentCollection;
 //	}

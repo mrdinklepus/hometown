@@ -9,7 +9,6 @@ import appcontroller.TinySession;
 
 import sessionBeans.BusinessRulesBean;
 import sessionBeans.BusinessRulesRemote;
-import entityBeans.Person;
 
 public class UpdateUPBCO implements BCOInterface{
 
@@ -21,25 +20,28 @@ public class UpdateUPBCO implements BCOInterface{
 		String un = req.getParameter("un");
 		String pw1 = req.getParameter("pw1");
 		String pw2 = req.getParameter("pw2");
-		String message = "";
-		System.out.println("user is " + un);
-		System.out.println("user id is " + uid);
-		System.out.println("pw is " + un);
 		
 		if (pw1.equals(pw2) && !pw1.equals("") && !pw2.equals(""))
 		{
-			Context jndiContext;
 			try
 			{
-				jndiContext = new InitialContext();
+				Context jndiContext = new InitialContext();
 				BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
-				message = businessRulesRemote.updateUser(uid, un, pw1);
-				req.setAttribute("error", message);
-				System.out.println("error message is " + message);
-								
-			}catch(Exception e){
-
+				String message = businessRulesRemote.updateUser(uid, un, pw1);
+				
+				if (message != null)
+				{
+				  req.setAttribute("error", message);
+				}
+				else
+				{
+				  req.setAttribute("success", "Thank You.  Your Username and Password have been changed.");
+				}
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
+				return "jndierror";
 			}	
 		}
 		else

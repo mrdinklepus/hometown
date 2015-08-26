@@ -1,23 +1,20 @@
 package businessControl;
 
-import java.math.BigDecimal;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import appcontroller.TinySession;
-
 import sessionBeans.BusinessRulesBean;
 import sessionBeans.BusinessRulesRemote;
+import appcontroller.TinySession;
 import entityBeans.Person;
 
 public class AddPayeeBCO implements BCOInterface{
 	
 	public Object doSomething(HttpServletRequest req, HttpServletResponse resp) 
 	{
-		TinySession aSession = (TinySession) req.getAttribute("session"); 				
+		TinySession aSession = (TinySession)req.getAttribute("session"); 				
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());
 		
 		String coname = req.getParameter("coname");
@@ -27,32 +24,32 @@ public class AddPayeeBCO implements BCOInterface{
 		String zip = req.getParameter("zip");
 		String phone = req.getParameter("phone");
 		String accnum = req.getParameter("accnum");
-		req.setAttribute("error", "");
 		
 		System.out.println("Company name is " + coname + " and phone number is " + phone);
 		
 		Person person = null;
-		Context jndiContext;
-		
-		String isvalid = validate(coname, street, city, state, zip, phone, accnum);
 		
 		try
 		{	
-			jndiContext = new InitialContext();			
+		  Context jndiContext = new InitialContext();			
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 			
-			if (isvalid.compareTo("isValid") != 0)
+			String isvalid = validate(coname, street, city, state, zip, phone, accnum);
+			if (isvalid != null)
 			{			
 				req.setAttribute("error", isvalid);
 			}
 			else
 			{
-				businessRulesRemote.addPayee(uid, coname, street, city, state.toUpperCase(), zip, phone, accnum);
-				req.setAttribute("error", "suc");
+				businessRulesRemote.addPayee(uid, coname.toUpperCase(), street, city, state.toUpperCase(), zip, phone, accnum);
+				req.setAttribute("success", "Payee added!  You may now make payments to " + coname + ".");
 			}
 			person = businessRulesRemote.getPerson(uid);
-		}catch(Exception e){
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
+			return "jndierror";
 		}
 		return person;		
 	}
@@ -60,26 +57,28 @@ public class AddPayeeBCO implements BCOInterface{
 	public String validate(String co, String str, String ci, String st, String z, String p, String an)
 	{
 		String test = null;
-		if (p == "" || p.length() == 10)
+		if (p.isEmpty() || p.length() == 10)
 		{
-			if (co != "" && str != "" && ci != "" && st != "" && z != "" && an != "")
+			if (co.isEmpty() || str.isEmpty() || ci.isEmpty() || st.isEmpty() || z.isEmpty() || an.isEmpty())
 			{
+        System.out.println("Field was blank");
+        test = "**Unable to add Payee.  Missing required information.**";
+      }
+		  else
+		  {
 				boolean testzip = isParsableToDouble(z);
 				boolean testphone = isParsableToDouble(p);
-				if (testzip == true && testphone == true)
+				if (!testzip || !testphone)
 				{
-					test = "isValid";
-				}else{
 					System.out.println("Invalid zip or phone number");
 					test = "**Unable to add Payee.  Invalid zip code or phone number.**";
 				}				
-			}else{
-				System.out.println("Field was blank");
-				test = "**Unable to add Payee.  Missing required information.**";
-			}		
-		}else{
+			}
+		}
+		else
+		{
 			System.out.println("Phone not complete");
-			test = "**Unable to add Payee.  Phone number must be 10 digits.**";
+			test = "**Unable to add Payee.  Phone incomplete - number must be 10 digits.**";
 		}
 		return test;
 	}
@@ -88,7 +87,7 @@ public class AddPayeeBCO implements BCOInterface{
 	{
 		try
 		{
-			if (i.compareTo("") != 0)
+			if (!i.isEmpty())
 			{
 				double a = Double.valueOf(i);
 			}

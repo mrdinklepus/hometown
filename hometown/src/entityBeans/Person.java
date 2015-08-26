@@ -8,6 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -23,7 +24,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 @Entity
 public class Person implements Serializable {
 	@Id	
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int personid;
 
 	private String firstname;
@@ -41,7 +42,7 @@ public class Person implements Serializable {
 	private Branch branchid;
 
 	@OneToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
-	@PrimaryKeyJoinColumn
+	@JoinColumn(name="addressid")
 	private Address addressid;
 	
 	@OneToMany(fetch=FetchType.EAGER, orphanRemoval=true, cascade=CascadeType.ALL)
@@ -56,10 +57,7 @@ public class Person implements Serializable {
   @OneToMany(mappedBy="personid", fetch=FetchType.EAGER, orphanRemoval=true, cascade=CascadeType.ALL)
   private Set<Payments> scheduledPayments;
   
-  @ManyToMany(fetch=FetchType.EAGER)
-  @JoinTable(name="personaccount",
-    joinColumns=@JoinColumn(name="accountid"),
-    inverseJoinColumns=@JoinColumn(name="personid"))
+  @ManyToMany(mappedBy="accountOwners", fetch=FetchType.EAGER, cascade={CascadeType.PERSIST, CascadeType.MERGE})
   private Set<Account> accounts;
   
 	private static final long serialVersionUID = 1L;
@@ -281,5 +279,15 @@ public class Person implements Serializable {
 	 */
 	public void setScheduledPayments(Set<Payments> scheduledPayments) {
 		this.scheduledPayments = scheduledPayments;
-	}	
+	}
+	
+	public void addPayment(Payments payment)
+	{
+	  this.scheduledPayments.add(payment);
+	}
+	
+	public void removePayment(Payments payment)
+	{
+	  this.scheduledPayments.remove(payment);
+	}
 }

@@ -23,23 +23,22 @@ public class OrderChecksBCO implements BCOInterface
 		String checkid = req.getParameter("cid");
 		int accountid = Integer.parseInt(req.getParameter("aid"));
 		BigDecimal amount = new BigDecimal(req.getParameter("amt"));
-		req.setAttribute("success", "");
 		
 		Person person = null;
-		Context jndiContext;
 		
 		try
 		{			
-			jndiContext = new InitialContext();
+		  Context jndiContext = new InitialContext();
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
+			businessRulesRemote.orderChecks(uid, accountid, amount, checkid);
 			
-			businessRulesRemote.orderChecks(accountid, amount, checkid);
-			
-			req.setAttribute("success", "yes");
+			req.setAttribute("success", "Thank You for ordering from Hometown Webbank.  Your checks have been ordered!");
 			person = businessRulesRemote.getPerson(uid);
-			
-		}catch(Exception e){
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
+			return "jndierror";
 		}
 		return person;		
 	}

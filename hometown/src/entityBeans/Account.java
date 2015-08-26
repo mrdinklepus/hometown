@@ -11,6 +11,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -20,7 +21,7 @@ import javax.persistence.OneToMany;
 @Entity
 public class Account implements Serializable {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int accountid;
 
 	@Enumerated(EnumType.STRING)
@@ -39,10 +40,13 @@ public class Account implements Serializable {
 	@OneToMany(mappedBy="accountid", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private Set<CheckOrder> checkOrders;
 	
-	@OneToMany(mappedBy="accountid", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="accountid", fetch=FetchType.EAGER)
 	private Set<Payments> payments;
 	
-	@ManyToMany(mappedBy="accounts")
+	@ManyToMany
+	@JoinTable(name="personaccount",
+    joinColumns=@JoinColumn(name="accountid"),
+    inverseJoinColumns=@JoinColumn(name="personid"))
   private Set<Person> accountOwners;
 
 	private static final long serialVersionUID = 1L;

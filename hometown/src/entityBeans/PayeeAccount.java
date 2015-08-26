@@ -8,9 +8,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 
+@NamedQuery(name="PayeeAccount.findByAccountId", query="SELECT p FROM PayeeAccount p" +
+    " WHERE p.payeeAccountKey.payeeaccountno = :accountid")
 @Entity
-public class PayeeAccount implements Serializable {
+public class PayeeAccount implements Serializable
+{
 	@EmbeddedId
 	private PayeeAccountKey payeeAccountKey;
 

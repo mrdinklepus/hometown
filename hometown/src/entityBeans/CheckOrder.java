@@ -1,8 +1,11 @@
 package entityBeans;
 import java.io.Serializable;
 import java.math.BigDecimal;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -12,7 +15,7 @@ import util.DateUtils;
 @Entity
 public class CheckOrder implements Serializable {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int orderid;
 
 	private String dateordered;
@@ -20,6 +23,10 @@ public class CheckOrder implements Serializable {
 	private BigDecimal amount;
 	
 	private String checkid;
+	
+	@ManyToOne
+  @JoinColumn(name="personid")
+  private Person personid;
 	
 	@ManyToOne
 	@JoinColumn(name="accountid")
@@ -32,12 +39,14 @@ public class CheckOrder implements Serializable {
 	  
 	}
 	
-	public CheckOrder(BigDecimal amount, String checkId, Account a)
+	public CheckOrder(BigDecimal amount, String checkId, Person p, Account a)
 	{
     this.amount = amount;
     this.checkid = checkId;
+    this.personid = p;
     this.accountid = a;
-    this.dateordered = DateUtils.Now("dd-MMM-yy");
+    // TODO turn this into time
+    this.dateordered = DateUtils.Now("yyyy-MM-dd");
 	}
 
 	public int getOrderid() {
@@ -48,7 +57,17 @@ public class CheckOrder implements Serializable {
 		this.orderid = orderid;
 	}
 
-	public Account getAccountid() {
+	public Person getPersonid()
+  {
+    return personid;
+  }
+
+  public void setPersonid(Person personid)
+  {
+    this.personid = personid;
+  }
+
+  public Account getAccountid() {
 		return this.accountid;
 	}
 

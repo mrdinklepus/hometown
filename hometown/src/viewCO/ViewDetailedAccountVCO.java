@@ -24,8 +24,6 @@ public class ViewDetailedAccountVCO implements VCOInterface {
 	public void doDisplay(HttpServletRequest req, HttpServletResponse resp) throws IOException 
 	{	
 		TreeSet<BankTransaction> transactions = new TreeSet<BankTransaction>();
-		int counter = -1;
-		int elem = -1;
 		
 		try 
 		{
@@ -41,78 +39,9 @@ public class ViewDetailedAccountVCO implements VCOInterface {
 			
 			transactions.addAll(trans1);
 			transactions.addAll(trans2);
-			
-//			// TODO Is this just ordering the transactions???
-//			for (Iterator it = trans1.iterator(); it.hasNext();) 
-//			{	
-//				BankTransaction bt = (BankTransaction)it.next();
-//				BankTransaction bt2 = null;
-//				
-//				if (counter == -1)
-//				{
-//					if (bt != null)
-//					{
-//						transactions.add(bt);
-//					}
-//					elem++;
-//					counter++;
-//				}
-//				else 
-//				{
-//					int i = 0;
-//					while (i == 0)
-//					{	
-//						bt2 = (BankTransaction)transactions.get(counter);
-//						if ((bt.getTransactionid() < bt2.getTransactionid()) && (counter == 0))
-//						{
-//							transactions.add(counter, bt);
-//							elem++;
-//							i++;
-//						}						
-//						else if (bt.getTransactionid() < bt2.getTransactionid()) 
-//						{
-//							int c = counter - 1;
-//							BankTransaction bt3 = (BankTransaction)transactions.get(c);
-//							
-//							if (bt.getTransactionid() < bt3.getTransactionid())
-//							{	
-//								counter--;
-//							}
-//							else 
-//							{
-//								transactions.add(counter, bt);
-//								elem++;
-//								i++;
-//							}
-//						}						
-//						else if ((bt.getTransactionid() > bt2.getTransactionid()) && (counter == elem))
-//						{	
-//							transactions.add(bt);
-//							elem++;
-//							i++;
-//						}
-//						else if (bt.getTransactionid() >= bt2.getTransactionid())
-//						{
-//							int c = counter + 1;
-//							BankTransaction bt3 = (BankTransaction)transactions.get(c);
-//							
-//							if (bt.getTransactionid() >= bt3.getTransactionid())
-//							{
-//								counter++;
-//							}
-//							else 
-//							{
-//								transactions.add(c, bt);
-//								elem++;
-//								i++;
-//							}
-//						}	
-//					}
-//				}
-//			}
-//			
-//			System.out.println("List contains " + transactions.size() + " elements");
-		} catch (Exception ex) {
+		}
+		catch (Exception ex)
+		{
 			ex.printStackTrace();			
 		}
     

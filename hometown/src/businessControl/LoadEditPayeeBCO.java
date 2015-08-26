@@ -23,36 +23,35 @@ public class LoadEditPayeeBCO implements BCOInterface{
 		TinySession aSession = (TinySession) req.getAttribute("session"); 				
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());				
 		int payeeid = Integer.parseInt(req.getParameter("payeeid"));
-		req.setAttribute("error", "");
 		
 		Payee payee = null;
-		Context jndiContext;
 		
 		try
 		{			
-			jndiContext = new InitialContext();
+		  Context jndiContext = new InitialContext();
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 					
 			payee = businessRulesRemote.getpayeebyid(payeeid);
 			Person per = businessRulesRemote.getPerson(uid);
 			
-			Set<PayeeAccount> spp = per.getPayeeAccounts();
+			Set<PayeeAccount> payeeAccounts = per.getPayeeAccounts();
 			
-			PayeeAccount pp = null;
+			PayeeAccount payeeAccount = null;
 			
-			for (Iterator iterator = spp.iterator(); iterator.hasNext();)
+			Iterator<PayeeAccount> it = payeeAccounts.iterator();
+			while (it.hasNext())
 			{
-				PayeeAccount tpp = (PayeeAccount)iterator.next();
+				PayeeAccount tpp = it.next();
 				
 				if (payee.getPayeeid() == (tpp.getPayeeAccountKey().getPayeeid().getPayeeid()))
 				{
-					pp = tpp;
+				  payeeAccount = tpp;
 				}
 			}
-			req.setAttribute("pp", pp);
-			System.out.println("Account number is " + pp.getPayeeAccountKey().getPayeeAccountNo());
-			
-		}catch(Exception e){
+			req.setAttribute("payeeAccount", payeeAccount);
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 		return payee;	

@@ -32,11 +32,14 @@ public class ViewAccountsVCO implements VCOInterface {
 			
 			try
 			{
-				System.out.println("displaying viewAccounts");
+			  for (Account a : person.getAccounts())
+			  {
+			    System.out.println("Balance is: " + a.getBalance());
+			  }
 				req.getRequestDispatcher("WEB-INF/viewaccounts.jsp").forward(req, resp);
-				System.out.println("View Accounts displayed");
-			
-			}catch (Exception e){
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
 			}
 		}	

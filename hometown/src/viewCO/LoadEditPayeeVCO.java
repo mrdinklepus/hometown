@@ -17,10 +17,12 @@ public class LoadEditPayeeVCO implements VCOInterface {
 	throws IOException 
 	{
 		Payee p = (Payee)req.getAttribute("reqObject");
-		Address add = p.getAddress();
 		Set<Phone> ph = p.getPhones();
-		req.setAttribute("address", add);
-		req.setAttribute("phone", ph);
+		if (!ph.isEmpty())
+		{
+		  // Should only have one phone
+		  req.setAttribute("phone", ph.iterator().next());
+		}
 		
 		try 
 		{

@@ -21,129 +21,104 @@ import sessionBeans.BusinessRulesRemote;
 
 public class PayBillBCO implements BCOInterface
 {
-	
 	public Object doSomething(HttpServletRequest req, HttpServletResponse resp) 
 	{
 		TinySession aSession = (TinySession) req.getAttribute("session"); 				
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());
-		String out = req.getParameter("bills");
-		System.out.println(out);
 		String[] bills = req.getParameter("bills").split("``");
 		
-		List<String> list1 = new ArrayList();
-		req.setAttribute("success", "");
-		req.setAttribute("error", "");
-		req.setAttribute("payid", "");
-		req.setAttribute("errlist1", "");
+		List<String> list1 = new ArrayList<>();
 		
-		Person person = null;		
-		BigDecimal amount;
-		int payeeId;
-		int accountId;
-		boolean test2 = true;
+		Person person = null;
+		boolean isValid = true;
 		boolean onegood = false;
-				
-		Context jndiContext;
-		BusinessRulesRemote businessRulesRemote = null;
 		
 		try 
 		{			
-			jndiContext = new InitialContext();
-			businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
+		  Context jndiContext = new InitialContext();
+		  BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 			
-			for (int i = 0; i < bills.length; i++)
+		  for (int i = 0; i < bills.length; i++)
 			{
 				String[] args = bills[i].split("~~");
-				payeeId = Integer.parseInt(args[0]);
+				int payeeId = Integer.parseInt(args[0]);
 				
-				if (args[1].compareTo("") != 0)
+				if (!args[1].isEmpty())
 				{
 					onegood = true;
-					String isvalid = validate(args[1]);
-					if (isvalid.compareTo("isValid") != 0)
+					isValid = isParsableToBig(args[1]);
+					if (!isValid)
 					{
 						System.out.println("Invalid Number");
-						req.setAttribute("error", isvalid);
-						test2 = false;
+						req.setAttribute("error", "** One or more payments was incomplete.  Please enter a valid amount. **");
 					}
 					else
 					{															
-						amount = new BigDecimal(args[1]);
-						accountId = Integer.parseInt(args[2]);
+					  BigDecimal amount = new BigDecimal(args[1]);
+						int accountId = Integer.parseInt(args[2]);
 						BigDecimal z = new BigDecimal("0");
 						if (amount.compareTo(z) > 0)
 						{
-							Account fr = businessRulesRemote.getAccount(accountId);
-							BigDecimal balance = fr.getBalance();	
-							if (balance.compareTo(amount) > 0 || fr.getAccountType().equals("R"))
+							Account fromAccount = businessRulesRemote.getAccount(accountId);
+							BigDecimal balance = fromAccount.getBalance();	
+							if (balance.compareTo(amount) > 0 || fromAccount.getAccountType().equals("R"))
 							{
 								String desc = args[3];
 								businessRulesRemote.payBill(accountId, payeeId, amount, desc);
-								person = businessRulesRemote.getPerson(uid);
-								req.setAttribute("success", "suc");
+								req.setAttribute("success", "Your payments have been made.  You may make other payments.");
 							}
 							else
 							{
 								System.out.println("Not Sufficient Funds");
-								req.setAttribute("error", "**One or more payments were incomplete.  Insufficient funds to complete transactions.**");
-								test2 = false;														
+								req.setAttribute("error", "** One or more payments was incomplete.  Insufficient funds to complete all transactions. **");
+								isValid = false;														
 							}				
 						}
 						else
 						{
 							System.out.println("Amount entered is zero");
-							req.setAttribute("error", "**One or more payments were incomplete.  Please enter a valid amount.**");
-							test2 = false;
+							req.setAttribute("error", "** One or more payments was incomplete.  Please enter a valid amount. **");
+							isValid = false;
 						}									
 					}
 				}
-				if(!test2)
+				
+				if (!isValid)
 				{
 					list1.add(businessRulesRemote.getpayeebyid(payeeId).getCompany());
-					person = businessRulesRemote.getPerson(uid);
-					test2 = true;
+					isValid = true;
 				}											
 			}
+		  
 			if (!onegood)
 			{
-				System.out.println("No values entered");
 				req.setAttribute("error", "No value entered.  Please enter a valid amount.");
-				person = businessRulesRemote.getPerson(uid);
-			}			
-			req.setAttribute("errlist1", list1);
+			}
 			
-		} catch (NumberFormatException e){
+			if (list1.isEmpty())
+			{
+			  req.setAttribute("success", "Your payments have been made.  You may make other payments.");
+			}
+			else
+			{
+			  req.setAttribute("billpayErrorList", list1);
+			}
+			
+			person = businessRulesRemote.getPerson(uid);
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
-		} catch (EJBException e){
-			e.printStackTrace();
-		} catch(Exception e) {
-			e.printStackTrace();
+			return "jndierror";
 		}
 		return person;		
-	}
-	
-	public String validate(String am)
-	{
-		String isvalid = "";
-		
-		boolean test = isParsableToBig(am);					
-		if (test)
-		{
-			isvalid = "isValid";		
-		}
-		else
-		{
-			System.out.println("Not parsable to BigDecimal");
-			isvalid = "One or more of the payments you made was incomplete.  Please enter a valid amount.";
-		}
-		return isvalid;
 	}
 	
 	public boolean isParsableToBig(String i)
 	{
 		try
 		{			
-			BigDecimal a = new BigDecimal(i);
+			new BigDecimal(i);
 			return true;
 		}
 		catch(NumberFormatException nfe)

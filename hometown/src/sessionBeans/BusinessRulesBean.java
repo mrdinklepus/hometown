@@ -6,6 +6,7 @@ package sessionBeans;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +29,7 @@ import entityBeans.Address;
 import entityBeans.BankTransaction;
 import entityBeans.CheckOrder;
 import entityBeans.Payee;
+import entityBeans.PayeeAccountKey;
 import entityBeans.Payments;
 import entityBeans.Person;
 import entityBeans.PayeeAccount;
@@ -64,7 +66,17 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 		query.setParameter("username", username);
 		query.setParameter("password", password);
 		
-		return query.getSingleResult();			
+		Person person = null;
+		try
+		{
+		  person = query.getSingleResult();
+		}
+		catch (NoResultException e)
+		{
+		  // Nothing to do here
+		}
+		
+		return person;			
 	}
 	
 //	SIGNUP  ****************************************************************************************	
@@ -116,8 +128,6 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 							p.setUsername(username);
 							p.setPassword(pw);
 							em.merge(p);
-							//TODO change
-							message = "suc";
 							break;
 						}
 						else
@@ -246,7 +256,8 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 		trans.setPayeeCollection(set);
 		
 		em.merge(from);
-		em.persist(trans);		
+		em.persist(trans);
+		em.flush();
 	}
 
 //  UNDO PAY  **********************************************************************************
@@ -262,9 +273,19 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 //  ORDER CHECKS  ********************************************************************************
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
-	public void orderChecks(int fromAccountId, BigDecimal amount, String checkId) 
+	public void orderChecks(int personId, int fromAccountId, BigDecimal amount, String checkId) 
 	{
-    Account from = em.find(Account.class, fromAccountId);
+	  Person person = em.find(Person.class, personId);
+    Account from = null;
+    for (Account a : person.getAccounts())
+    {
+      if (a.getAccountid() == fromAccountId)
+      {
+        from = a;
+        break;
+      }
+    }
+    
     if (from == null)
     {
       throw new EJBException("The account does not exist");
@@ -279,13 +300,12 @@ public class BusinessRulesBean implements BusinessRulesRemote {
       from.credit(amount);
     }
     
-    CheckOrder order = new CheckOrder();
-    order.placeOrder(amount, checkId, from);
+    CheckOrder order = new CheckOrder(amount, checkId, person, from);
     BankTransaction trans = new BankTransaction(from, amount, TransactionType.CHECK_ORDER, "Checks Ordered", null);
+    from.getCheckOrders().add(order);
+    from.getTransactionsOut().add(trans);
     
-//    em.merge(from);
-    em.persist(order);
-    em.persist(trans);
+    em.merge(from);
 	}
 
 //  TRANSFER FUNDS  *******************************************************************************
@@ -337,7 +357,6 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	{
 	  // Address
 		Address add = new Address(street, city, state, zip);
-//		em.persist(add);
 
 		// Phone Check
 		Set<Phone> phoneCollection = new HashSet<>();
@@ -345,14 +364,12 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 		if (!phone.isEmpty())
 		{
 		  System.out.println("Creating New Phone...");
-		  newPhone = new Phone(phone, PhoneType.WORK);
+		  newPhone = new Phone(phone, PhoneType.MAIN);
 		  phoneCollection.add(newPhone);
-//			em.persist(newPhone);
 		}
 		
 		// Add Payee		
-		Payee payee = new Payee();
-		payee.addPayee(coname, add, phoneCollection);
+		Payee payee = new Payee(coname, add, phoneCollection);
 		em.persist(payee);
 
 		PayeeAccount pp = new PayeeAccount(accnum, getPerson(uid), payee);
@@ -362,7 +379,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 //  UPDATE PAYEE  ***************************************************************************
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRED)
-	public void updatePayee(int payeeid, PhoneType phonetype, int ppid,
+	public Payee updatePayee(int payeeid, int uid, PhoneType phonetype, String origaccnum,
 	                        String coname, String street, String city, 
 			                    String state, String zip, String phone, String accnum)
 	{
@@ -396,7 +413,7 @@ public class BusinessRulesBean implements BusinessRulesRemote {
     {     
       if (!phone.isEmpty())
       {
-        Phone newPhone = new Phone(phone, PhoneType.WORK);
+        Phone newPhone = new Phone(phone, PhoneType.MAIN);
         existingPhone.add(newPhone);
       }
     }
@@ -408,8 +425,29 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 		add.setZipcode(zip);
     existingPayee.setCompany(coname);
     
-		PayeeAccount pp = em.find(PayeeAccount.class, ppid);
-		pp.getPayeeAccountKey().setPayeeAccountNo(accnum);
+    if (!origaccnum.equals(accnum))
+    {
+      Person person = em.find(Person.class, uid);
+      PayeeAccount pa = null;
+      for (PayeeAccount paccount : person.getPayeeAccounts())
+      {
+        if (paccount.getPayeeAccountKey().getPayeeAccountNo().equals(origaccnum))
+        {
+          pa = paccount;
+          break;
+        }
+      }
+      
+      if (pa != null)
+      {
+        // I guess you can't update a composite pk?  Have to remove and add a new one...
+        person.getPayeeAccounts().remove(pa);
+        person.getPayeeAccounts().add(new PayeeAccount(accnum, person, existingPayee));
+        em.merge(person);
+      }
+    }
+		
+		return existingPayee;
 	}
 
 //  REMOVE PAYEE  ***************************************************************************
@@ -451,14 +489,17 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 //  SCHEDULE PAYMENT  ***************************************************************************
 	
 	@TransactionAttribute(value=TransactionAttributeType.REQUIRES_NEW)
-	public void schedulePayment(int personid, int fromac, int payeeid, BigDecimal amount, String date)
+	public Person schedulePayment(int personid, int fromac, int payeeid, BigDecimal amount, Date date)
 	{	
 		Person person = em.find(Person.class, personid);
 		Account from = em.find(Account.class, fromac);
 		Payee payee = em.find(Payee.class, payeeid);
 		
-		Payments payment = new Payments(person, from, payee, amount, date);		
-		em.persist(payment);				
+		Payments payment = new Payments(person, from, payee, amount, date);
+		person.addPayment(payment);
+		em.merge(person);
+		
+		return person;
 	}
 
 //  REMOVE PAYMENT  ****************************************************************************
@@ -469,18 +510,15 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	{		
 		String company = "";
 		Person person = em.find(Person.class, uid);
+		Payments pmt = em.find(Payments.class, paymentid);
 		
-		Collection<Payments> personPayments = person.getScheduledPayments();
-		for (Payments payment : personPayments)
+		if (pmt != null)
 		{
-			if (payment.getPaymentid() == paymentid)
-			{
-			  personPayments.remove(payment);
-//				em.remove(payment);
-				company = payment.getPayeeid().getCompany();
-				break;
-			}
+		  company = pmt.getPayeeid().getCompany();
+		  person.removePayment(pmt);
+		  em.merge(person);
 		}
+		
 		return company;
 	}
 
@@ -509,11 +547,11 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 	
 	public String updateUser(int uid, String userName, String pw)
 	{
-		String message = "";
+		String message = null;
 		try
 		{
 			Person person = em.find(Person.class, uid);
-			if (userName != null && !userName.isEmpty())
+			if (userName != null && !userName.isEmpty() && !person.getUsername().equals(userName))
 			{
 				TypedQuery<Person> query = em.createQuery("SELECT p from Person p " +
 						                                      "WHERE p.username = :uname", Person.class);
@@ -523,7 +561,6 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 				{
 					person.setUsername(userName);
 					person.setPassword(pw);
-					message = "suc";
 				}
 				else
 				{
@@ -533,9 +570,10 @@ public class BusinessRulesBean implements BusinessRulesRemote {
 			else
 			{
 				person.setPassword(pw);
-				message = "suc";
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 		  e.printStackTrace();
 		}
 		return message;

@@ -1,9 +1,11 @@
 package entityBeans;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -11,12 +13,12 @@ import javax.persistence.ManyToOne;
 @Entity
 public class Payments implements Serializable {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int paymentid;
 
 	private BigDecimal amount;
 	
-	private String paydate;
+	private Date paydate;
 
 	@ManyToOne
 	@JoinColumn(name="personid")
@@ -31,13 +33,13 @@ public class Payments implements Serializable {
 	private Payee payeeid;
 
 	private static final long serialVersionUID = 1L;
-
+	
 	public Payments()
 	{
 	  
 	}
 	
-	public Payments(Person person, Account a, Payee p, BigDecimal amount, String date) 
+	public Payments(Person person, Account a, Payee p, BigDecimal amount, Date date) 
 	{
     this.personid = person;
     this.accountid = a;
@@ -78,20 +80,12 @@ public class Payments implements Serializable {
 		this.payeeid = payeeid;
 	}
 
-	public String getPaydate() {
+	public Date getPaydate() {
 		return this.paydate;
 	}
 
-	public void setPaydate(String paydate) {
+	public void setPaydate(Date paydate) {
 		this.paydate = paydate;
-	}
-	
-	public void schedulePay(Person person, Account a, Payee p, BigDecimal amount, String date){
-		this.personid = person;
-		this.accountid = a;
-		this.payeeid = p;
-		this.amount = amount;
-		this.paydate = date;
 	}
 
 	/**

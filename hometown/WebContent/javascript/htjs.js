@@ -14,179 +14,106 @@
  * 	}
  */
 
-var isNavVisible = false;
-
 function setActive(id)
 {	
-	if (id == null){ return false; }
-	if (!document.getElementById(id)){ return false; }
+	if (id == null) { return false; }
+	if (!document.getElementById(id)) { return false; }
 	
 	var items = (document.getElementById(id).parentNode).getElementsByTagName("li");
-	for(var i = 0; i < items.length; i++){
+	for (var i = 0; i < items.length; i++) {
 		document.getElementById(items[i].id).style.background = "#84B5E4";	
 	}	
 	document.getElementById(id).style.background = "#BED8F1";
 }
 
-function show(id)
-{
+function show(id) {
 	document.getElementById(id).style.display = "block";	
 }
 
-function hide(id)
-{
+function hide(id) {
 	document.getElementById(id).style.display = "none";
 }
 
-function init()
-{	
-	hide("logout");	
-	hide("uUP");
-
-	var nav = document.getElementById("navigation").getElementsByTagName("li");
+function init() {
+	//var nav = document.getElementById("navigation").getElementsByTagName("li");
 	
-	for(var i = 0; i < nav.length; i++){
-		Object.extend(nav[i],navExtend);
-	}
-	//document.login.unameb.focus();
+	//for (var i = 0; i < nav.length; i++) {
+	//	Object.extend(nav[i], navExtend);
+	//}
 }
 
-function showExpired()
-{
-	loadSubPageContent(new updateContent(), "login.html");
-	//document.getElementById("error").innerHTML = data;	
-}
-
-function showLogin()
-{
-	show("waiting");
+function showExpired() {
 	loadSubPageContent(new updateContent(), "login.html");
 }
 
-function showSignup()
-{
-	show("waiting");
+function showLogin() {
+	loadSubPageContent(new updateContent(), "login.html");
+}
+
+function showSignup() {
 	loadSubPageContent(new updateContent(),"signup.jsp");
 }
 
-//function showRemovePayee(payid)
-//{
-//	show("waiting");
-//	loadSubPageContent(new updateContent(),"WEB-INF/confirmRemPayee.jsp");
-//}
-
-function showViewAccounts()
-{
-	show("waiting");
+function showViewAccounts() {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=viewAccounts", "POST");
 	setActive("viewAccounts");
 }
 
-function showBillPay()
-{
-	show("waiting");
+function showBillPay() {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadBillPay", "POST");
 	setActive("billPay");
 }
 
-function showManagePayees()
-{
-	show("waiting");
+function showManagePayees() {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadManagePayees", "POST");
 }
 
-function showSchedule()
-{
-	show("waiting");
+function showSchedule() {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadSchedulePayment", "POST");
 }
 
-function showTransfer()
-{
-	show("waiting");
+function showTransfer() {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadTransfer", "POST");
 	setActive("transfer");
-	//document.getElementById("foc").focus();
 }
 
-function showOrderCheck()
-{
-	show("waiting");
+function showOrderCheck() {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?cmd=loadChecks", "POST");
 	setActive("orderCheck");
 }
 
-function showAbout()
-{
-	show("waiting");
+function showAbout() {
 	loadSubPageContent(new updateContent(), "about.html");
 }
 
-function showNav()
-{
-	show("navigation");
-	show("logout");
-	show("uUP");
+function showNav() {
+	if (document.getElementById("navigation") != null) {
+		show("navigation");
+		show("logout");
+		show("updateUP");
+	}
 }
 
-function showAccountDetails(accountId)
-{
-	show("waiting");
+function hideNav() {
+	hide("logout");
+	hide("updateUP");
+	if (document.getElementById("navigation") != null) {
+		hide("navigation");
+	}
+}
+
+function showAccountDetails(accountId) {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=viewDetailedAccount&accountId=" + accountId );
 	setActive("viewAccounts");
 }
 
-function getFormElements(){
-	var params = new Array();	
-	
-	var formElements = document.getElementsByTagName("form")[0];
-	
-	for (var i = 0 ; i < formElements.length ; i++){
-		params.push(new Array(formElements[i].name, formElements[i].value));
-	}			
-	return params;
-}
-
-function postForm(control){	
-	var params = getFormElements();
-	var poststr;
-	var valid;
-	
-	if (control == null) control = new updateContent();
-	for(var i = 0; i < params.length - 1; i++){		
-		if (i == 0){
-			valid = encodeURI(params[i][1]);
-			valid = valid.replace(/&/g, '');
-			valid = valid.replace(/~~/g, '&');
-			poststr = params[i][0] + "=" + valid;
-		}else{	
-			var temp = encodeURI(params[i][1]);
-			temp = temp.replace(/&/g, '');
-			temp = temp.replace(/~~/g, '&');
-			poststr += "&" + params[i][0] + "=" + temp;
-		}
-	}
-	show("waiting");
-	loadSubPageContent(control, "HomeTownServlet?", "POST", poststr);
-}
-
-function clearForm(){
-	var formElements = document.getElementsByTagName("form")[0];
-	
-	for (var i = 0 ; i < formElements.length - 2 ; i++){
-		formElements[i].value = "";
-	}
-	formElements[0].focus();
-	hide("waiting");
-}
-
-function payBills(){
+function payBills() {
 	var params = getFormElements();
 	var poststr = "cmd=payBill&bills=";
 	var temp;
 	
-	for (var i = 0; i < params.length; i++){
-		if (i % 4 == 0 && i != 0){
+	for (var i = 0; i < params.length; i++) {
+		if (i % 4 == 0 && i != 0) {
 			poststr += "``";
 		}
 		temp = params[i][1];
@@ -194,69 +121,57 @@ function payBills(){
 		poststr += temp + "~~";
 	}	
 	
-	show("waiting");
 	loadSubPageContent(new updateContent(), "HomeTownServlet?", "POST", poststr);	
 }
 
-function confirmRemovePayee(payeeId)
-{
-	show("waiting");
+function confirmRemovePayee(payeeId) {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=confirmRemovePayee&payeeid=" + payeeId);
 }
 
-function removePayee(payeeId)
-{
-	show("waiting");
+function removePayee(payeeId) {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=removePayee&payeeid=" + payeeId );
 }
 
-function editPayee(payeeId)
-{
-	show("waiting");
+function editPayee(payeeId) {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=loadEditPayee&payeeid=" + payeeId );
 }
 
-function removePayment(paymentId)
-{
-	show("waiting");
+function removePayment(paymentId) {
 	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=removePayment&paymentid=" + paymentId );
 }
 
-function showUpdateUP()
-{
-	show("waiting");
+function showUpdateUP() {
 	loadSubPageContent(new updateContent(),"HomeTownServlet?" , "POST", "cmd=loadUpdateUser");
 }
 
-function logout()
-{
-	loadSubPageContent(new updateContent(), "HomeTownServlet?" , "POST", "cmd=logout");
-	hide("logout");
-	hide("uUP");
+function logout() {
+	loadSubPageContent(new updateContentLogout(), "HomeTownServlet?" , "POST", "cmd=logout");
 }
 
 var navExtend = {
-	onmouseclick: function(e){ 
+	onmouseclick: function(e) { 
 		alert(e);
 	},
 	
-	onmouseover: function(e){		
+	onmouseover: function(e) {		
 		document.getElementById(this.id).style.background = "#BED8F1";
 	},
 	
-	onmouseout: function(e){
+	onmouseout: function(e) {
 		document.getElementById(this.id).style.background = "#84B5E4";
 	}
-	
 };
 
 Object.extend = function(destination, source) {
-	if(destination == null)
+	if (destination == null) {
 	    return null;
+	}
 	
-	if(source)
-	for (var property in source)
-	        destination[property] = source[property];
+	if (source) {
+	  for (var property in source) {
+	    destination[property] = source[property];
+	  }
+	}
 	
 	return destination;
 }
@@ -267,27 +182,49 @@ function limitText(limitField, limitNum) {
 	} 
 }
 
-function setcurs(){
-	document.getElementById(unameb).focus();
+//function setcurs(){
+//	document.getElementById(unametf).focus();
+//}
+
+function getFormElements() {
+	var params = new Array();	
+	
+	var formElements = document.getElementsByTagName("form")[0];
+	
+	for (var i = 0 ; i < formElements.length ; i++) {
+		params.push(new Array(formElements[i].name, formElements[i].value));
+	}			
+	return params;
 }
 
-//function doClick(buttonName, e)
-//{//Was going to use this for pressing enter but didn't need to
-//	var key;
-//	
-//	if(window.event)
-//		key = window.event.keyCode;
-//	else
-//		key = e.which;
-//
-//	if (key == 13)
-//    {
-//        //Get the button the user wants to have clicked
-//        var btn = document.getElementById(buttonName);
-//        if (btn != null)
-//        { //If we find the button click it
-//            btn.click();
-//            event.keyCode = 0
-//        }
-//    }	
-//}
+function postForm(control) {	
+	var params = getFormElements();
+	var poststr;
+	var valid;
+	
+	if (control == null) control = new updateContent();
+	for (var i = 0; i < params.length - 1; i++) {		
+		if (i == 0) {
+			valid = encodeURI(params[i][1]);
+			valid = valid.replace(/&/g, '');
+			valid = valid.replace(/~~/g, '&');
+			poststr = params[i][0] + "=" + valid;
+		} else {	
+			var temp = encodeURI(params[i][1]);
+			temp = temp.replace(/&/g, '');
+			temp = temp.replace(/~~/g, '&');
+			poststr += "&" + params[i][0] + "=" + temp;
+		}
+	}
+	
+	loadSubPageContent(control, "HomeTownServlet?", "POST", poststr);
+}
+
+function clearForm() {
+	var formElements = document.getElementsByTagName("form")[0];
+	
+	for (var i = 0 ; i < formElements.length - 2 ; i++) {
+		formElements[i].value = "";
+	}
+	formElements[0].focus();
+}

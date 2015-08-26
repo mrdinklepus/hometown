@@ -18,73 +18,66 @@ import sessionBeans.BusinessRulesBean;
 import sessionBeans.BusinessRulesRemote;
 import entityBeans.Person;
 
-public class SchedulePaymentBCO implements BCOInterface {
-	
+public class SchedulePaymentBCO implements BCOInterface
+{
 	public Object doSomething(HttpServletRequest req, HttpServletResponse resp) 
 	{
 		TinySession aSession = (TinySession) req.getAttribute("session"); 				
 		int uid = Integer.parseInt(aSession.getAttribute("personid").toString());
-		req.setAttribute("error", "");
-		req.setAttribute("remsuc", "");
 				
 		int from = Integer.parseInt(req.getParameter("accountid"));
 		int payeeid = Integer.parseInt(req.getParameter("payeeid"));		
 		String a = req.getParameter("amt");
-		String date = req.getParameter("date");
-		BigDecimal amount = null;
+		String dateString = req.getParameter("date");
 		
 		Person person = null;
-		Context jndiContext;
 		
-		String isvalid = validate(a, date);
+		boolean isValidInput = true;
+		Date date = validateDate(dateString);
+		if (date == null)
+		{
+		  System.out.println("Invalid date");
+		  req.setAttribute("error", "**Unable to Process Payment.  Please enter a valid date.  (Example: 22-Jan-2008)**");
+      isValidInput = false;
+		}
+		else if (!validateAmount(a))
+		{
+		  System.out.println("Invalid amount");
+		  req.setAttribute("error", "**Unable to Process Payment.  Please enter a valid amount.**");
+		  isValidInput = false;
+		}
 				
 		try
 		{			
-			jndiContext = new InitialContext();
+		  Context jndiContext = new InitialContext();
 			BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
 			
-			if (isvalid.compareTo("isValid") != 0)
+			if (isValidInput)
 			{
-				req.setAttribute("error", isvalid);
+			  BigDecimal amount = new BigDecimal(a);
+				person = businessRulesRemote.schedulePayment(uid, from, payeeid, amount, date);
+				req.setAttribute("success", "Thank You!  Your payment has been scheduled.");
 			}
 			else
 			{
-				amount = new BigDecimal(a);
-				businessRulesRemote.schedulePayment(uid, from, payeeid, amount, date);
-				req.setAttribute("error", "suc");
+			  person = businessRulesRemote.getPerson(uid);
 			}
-			person = businessRulesRemote.getPerson(uid);
-			
-		}catch(Exception e){
-			req.setAttribute("error", "jndierror");
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
+			return "jndierror";
 		}		
 		return person;
 	}
 	
-	public String validate(String am, String date)
+	public boolean validateAmount(String amount)
 	{
-		String ret = "";
-		boolean test = isParsableToBig(am);
-		if (test)
+		if (!isParsableToBig(amount))
 		{
-			boolean test2 = validateDate(date);
-			if (test2)
-			{
-				ret = "isValid";
-			}
-			else
-			{
-				System.out.println("Invalid date");
-				ret = "**Unable to Process Payment.  Please enter a valid date.  (Example: 22-Jan-2008)**";
-			}
-		}
-		else
-		{
-			System.out.println("Invalid amount");
-			ret = "**Unable to Process Payment.  Please enter a valid amount.**";
+			return false;
 		}	
-		return ret;
+		return true;
 	}
 	
 	public boolean isParsableToBig(String i)
@@ -94,18 +87,20 @@ public class SchedulePaymentBCO implements BCOInterface {
 			BigDecimal a = new BigDecimal(i);
 			return true;
 		}
-		catch(NumberFormatException nfe)
+		catch (NumberFormatException nfe)
 		{
 			return false;
 		}
 	}
 
-	//checks the date to make sure it is a valid date and not in the past.	 
-	public static boolean validateDate(String dateStr){
-       
+	/**
+	 * Checks the date to make sure it is a valid date and not in the past
+	 */
+	public static Date validateDate(String dateStr)
+	{
 		SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.US);
 		Date testDate = null;
-		boolean allowPast = false;
+		
 		try
 		{
 			System.out.println("trying parse");
@@ -115,30 +110,32 @@ public class SchedulePaymentBCO implements BCOInterface {
 		{
 			// invalid date format
 			System.out.println("badParse");
-			return false;
+			return null;
 		}
-		if (!allowPast)
+		
+		// initialize the calendar to midnight to prevent 
+		// the current day from being rejected
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		System.out.println("AllowedPast");
+		
+		if (cal.getTime().after(testDate))
 		{
-			// initialise the calendar to midnight to prevent 
-			// the current day from being rejected
-			Calendar cal = Calendar.getInstance();
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			System.out.println("AllowedPast");
-			
-			if (cal.getTime().after(testDate)) {
-				System.out.println("Calenderis False");
-				return false;
-			}
+			System.out.println("Calenderis False");
+			return null;
 		}
+		
 		// now test for legal values of parameters
-		if (!df.format(testDate).equals(dateStr)) {
+		if (!df.format(testDate).equals(dateStr))
+		{
 			System.out.println(df.format(testDate) + "legal test has failed " + dateStr);
-			return false;
+			return null;
 		}
+		
 		System.out.println("legal test has passed");
-		return true;
+		return testDate;
 	}
 }

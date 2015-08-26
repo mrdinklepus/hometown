@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
-<%@page import="entityBeans.Person, entityBeans.Personpayee, entityBeans.Account, entityBeans.Payee"%>
+<%@page import="entityBeans.Person, entityBeans.PayeeAccount, entityBeans.AccountType, entityBeans.Account, entityBeans.Payee"%>
 <%@page import="java.util.Iterator"%>
 <%@page import="java.util.List"%>
-<%@page import="java.util.LinkedList"%>
+<%@page import="java.util.ArrayList"%>
 <%
 Person person = (Person)request.getAttribute("reqObject");
-List list1 = (List)request.getAttribute("errlist1");
-List list2 = (LinkedList)request.getAttribute("alist");
+List<String> billpayErrorList = (List)request.getAttribute("billpayErrorList");
+if (billpayErrorList == null)
+{
+  billpayErrorList = new ArrayList<String>();
+}
+List<Account> billpayAccounts = (List)request.getAttribute("billpayAccounts");
 %>
 <%@ include file="navigation.html" %>
-<div id="waiting">
-	<p><b>Loading...</b></p><br/>
-	<img src="images/Progressbar.gif">
-</div>
-<div id="subnav">
-	<ul>
-		<li id="addPayee" onclick="showManagePayees();">Manage Payees</li>
-		<li id="schedulePayment" onclick="showSchedule();">Schedule Payment</li>
-	</ul>
-</div>
-<div id="emess">
+<header> 
+  <h3>Pay Bills</h3>
+  <p>Enter one or more payments to send to Payees</p>
+</header>
+<%@ include file="subnavBillPay.html" %>
+
+<div id="displayMsg">
 <%	
-	String a = request.getAttribute("error").toString();
-	String cd = request.getAttribute("success").toString();
-	if (!a.equals(""))
+	Object err = request.getAttribute("error");
+	Object suc = request.getAttribute("success");
+	if (err != null)
 	{ 
 %>
-<div class="transferSuccessful">
-	<p><%=a%></p>
+<div class="error">
+	<p><%=err.toString()%></p>
 </div>
 <%
-		cd = "no";
 	}
-	if (cd.equals("suc")){ 
+	else if (suc != null)
+	{ 
 %>
-<div class="transferSuccessful">
-	<p>&nbsp;Your payments have been made.  You may make other payments.</p>
+<div class="success">
+	<p><%=suc.toString()%></p>
 </div>
 <%}%>
 </div>
@@ -51,27 +51,30 @@ List list2 = (LinkedList)request.getAttribute("alist");
 	</div>
 	<form>
 <% 
-	Iterator i = person.getPersonpayeeCollection().iterator();
-	while(i.hasNext()){
-		Personpayee aPersonPayee = (Personpayee)i.next();
-		Payee payee = aPersonPayee.getPayeeid();
+	Iterator<PayeeAccount> i = person.getPayeeAccounts().iterator();
+	while (i.hasNext())
+	{
+		PayeeAccount aPersonPayee = i.next();
+		Payee payee = aPersonPayee.getPayeeAccountKey().getPayeeid();
 %>		
 		<div class="payment">
 			<ul>
-				<%if (list1.contains(payee.getCompany())){ %>
+				<%if (billpayErrorList.contains(payee.getCompany())) { %>
 				<li class="payee" style="color:red;text-decoration:underline;"><input type="hidden" name="payeeId" value="<%=payee.getPayeeid()%>" />*<%=payee.getCompany()%></li>
-				<%}else{ %>
+				<%} else { %>
 				<li class="payee"><input type="hidden" name="payeeId" value="<%=payee.getPayeeid()%>" /><%=payee.getCompany()%></li>
 				<%} %>
-				<li><input type="text" style="margin-left:10px;" name="payeeAmt" /></li>
+				<li><input type="number" step="0.01" style="margin-left:10px;" name="payeeAmt" /></li>
 				<li style="padding-right:5px;">
 					<select name="accountid">
-						<% for (Iterator b = list2.iterator(); b.hasNext();){ 
-								Account aAccount = (Account)b.next();
-								if (!aAccount.getAccounttype().equals("U")){ //|| aAccount.getAccounttype().equals("S") || aAccount.getAccounttype().equals("R")){ 
+						<%for (Iterator<Account> it = billpayAccounts.iterator(); it.hasNext();)
+						  { 
+								Account aAccount = it.next();
+								if (aAccount.getAccountType() != AccountType.SECURITY)
+								{
 						%>						
-								<option value="<%=aAccount.getAccountid() %>"><%=aAccount.getType()%><%=aAccount.getAccountno()%> &nbsp;($<%=aAccount.getBalance()%> )</option>
-						<%}} %>
+								<option value="<%=aAccount.getAccountid() %>"><%=aAccount.getType()%><%=aAccount.getAccountNo()%> &nbsp;($<%=aAccount.getBalance()%> )</option>
+						<%} }%>
 					</select>
 				</li>
 			</ul>

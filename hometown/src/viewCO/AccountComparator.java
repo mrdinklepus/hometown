@@ -5,14 +5,12 @@ import java.util.Comparator;
 import entityBeans.Account;
 import entityBeans.AccountType;
 
-public class AccountComparator implements Comparator
+public class AccountComparator implements Comparator<Account>
 {
-	public int compare(Object o, Object p)
+	public int compare(Account o, Account p)
 	{
-		Account a = (Account)o;
-		Account b = (Account)p;
-		AccountType c = a.getAccountType();
-		AccountType d = b.getAccountType();
+		AccountType c = o.getAccountType();
+		AccountType d = p.getAccountType();
 		return c.compareTo(d);
 	}
 }

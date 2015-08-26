@@ -36,7 +36,7 @@ public class TinySession
 		attributes = new Hashtable();
 		creationTime = new Date().getTime();
 		lastAccessTime = creationTime;
-		maxInactiveInterval = 10*60*1000;  //This time is in milliseconds
+		maxInactiveInterval = 1000*60*1000;  //This time is in milliseconds (1000 minutes for now)
 		valid = true;
 	}
 

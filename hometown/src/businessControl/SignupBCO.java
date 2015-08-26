@@ -24,8 +24,6 @@ public class SignupBCO implements BCOInterface
 		req.setAttribute("un", un);
 		req.setAttribute("pw", pw);
 		req.setAttribute("pw2", pw2);
-		req.setAttribute("validate", "");
-		String notSignedUp = "";
 		
 		if (pw.equals(pw2))
 		{
@@ -38,33 +36,31 @@ public class SignupBCO implements BCOInterface
 					Context jndiContext;
 					jndiContext = new InitialContext();			
 					BusinessRulesRemote businessRulesRemote = (BusinessRulesRemote)jndiContext.lookup(BusinessRulesBean.RemoteJNDIName);
-					notSignedUp = businessRulesRemote.signup(fn,ln,phone,un,pw);
+					String error = businessRulesRemote.signup(fn,ln,phone,un,pw);
 					
-					if (!notSignedUp.equals("suc"))
+					if (!error.isEmpty())
 					{
-						req.setAttribute("error", notSignedUp);
-						req.setAttribute("validate", "false");
+						req.setAttribute("error", error);
 					}
 					else
 					{
-						req.setAttribute("validate", "true");
+						req.setAttribute("success", "Thank You!  Your Online User Account has been created.");
 					}
-					
-				}catch(Exception e){
+				}
+				catch (Exception e)
+				{
 					e.printStackTrace();
-					req.setAttribute("error", "jndierror");
+					return "jndierror";
 				}
 			}	
 			else
 			{
 				req.setAttribute("error", test);
-				req.setAttribute("validate", "false");
 			}
 		}
 		else
 		{
 			req.setAttribute("error", "**Cannot setup account.  Passwords do not match.**");
-			req.setAttribute("validate", "false");
 		}		
 		return null;
 	}	
